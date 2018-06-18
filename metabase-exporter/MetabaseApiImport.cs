@@ -106,6 +106,7 @@ namespace metabase_exporter
                         .First();
                 }
             }
+            Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
             var newDashboard = await api.CreateDashboard(stateDashboard);
             await api.AddCardsToDashboard(newDashboard.Id, stateDashboard.Cards);
         }
@@ -121,11 +122,14 @@ namespace metabase_exporter
                 .ToList();
 
             var createdCollections = await collectionsToCreate
-                .Traverse(async collectionFromState =>
-                    new Mapping<Collection>(
-                        source: collectionFromState,
-                        target: await api.CreateCollection(collectionFromState)
-                    ));
+                .Traverse(async collectionFromState => {
+                    Console.WriteLine($"Creating collection '{collectionFromState.Name}'");
+                    var mapping = new Mapping<Collection>(
+                                           source: collectionFromState,
+                                           target: await api.CreateCollection(collectionFromState)
+                                       );
+                    return mapping;
+                });
 
             var mappedExistingCollections = stateCollections
                 .Select(collectionFromState =>
@@ -144,6 +148,7 @@ namespace metabase_exporter
 
         static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<int, int> databaseMapping)
         {
+            Console.WriteLine($"Creating card '{cardFromState.Name}'");
             if (cardFromState.CollectionId.HasValue)
             {
                 cardFromState.CollectionId = collectionMapping
