@@ -83,6 +83,9 @@ namespace metabase_exporter
         public IDictionary<string, TemplateTag> TemplateTags { get; set; }
     }
 
+    /// <summary>
+    /// Query parameter
+    /// </summary>
     public class TemplateTag
     {
         [JsonProperty("id")]
@@ -167,6 +170,9 @@ namespace metabase_exporter
         public string Type { get; set; }
     }
 
+    /// <summary>
+    /// A reference and placement of a card within a dashboard
+    /// </summary>
     public class DashboardCard
     {
         [JsonProperty("id")]
@@ -201,6 +207,9 @@ namespace metabase_exporter
         public object[] Series { get; set; }
     }
 
+    /// <summary>
+    /// Maps a dashboard parameter to a card parameter
+    /// </summary>
     public class DashboardCardParameterMapping
     {
         /// <summary>
