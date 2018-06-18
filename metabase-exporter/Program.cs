@@ -30,7 +30,8 @@ namespace metabase_exporter
         static async Task Export(this MetabaseApi api, Config.Export export)
         {
             var state = await api.Export();
-            File.WriteAllText(path: export.OutputFilename, contents: state);
+            var stateJson = JsonConvert.SerializeObject(state, Formatting.Indented);
+            File.WriteAllText(path: export.OutputFilename, contents: stateJson);
             Console.WriteLine($"Exported current state for {export.MetabaseApiSettings.MetabaseApiUrl} to {export.OutputFilename}");
         }
 

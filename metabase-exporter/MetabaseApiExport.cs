@@ -9,7 +9,7 @@ namespace metabase_exporter
 {
     public static class MetabaseApiExport
     {
-        public static async Task<string> Export(this MetabaseApi api)
+        public static async Task<MetabaseState> Export(this MetabaseApi api)
         {
             var cards = await api.GetAllCards();
             var nonArchivedCards = cards.Where(x => x.Archived == false).ToArray();
@@ -27,9 +27,7 @@ namespace metabase_exporter
                 Collections = nonArchivedCollections,
             };
 
-            return JsonConvert.SerializeObject(state, Formatting.Indented);
+            return state;
         }
-
-
     }
 }

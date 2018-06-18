@@ -2,7 +2,7 @@
   "profiles": {
     "metabase-exporter": {
       "commandName": "Project",
-      "commandLineArgs": "Command=import OutputFilename=metabase-state.json InputFilename=metabase-state.json DatabaseMapping:2=2"
+      "commandLineArgs": "Command=export OutputFilename=metabase-state.json InputFilename=metabase-state.json DatabaseMapping:2=2"
     }
   }
 }
