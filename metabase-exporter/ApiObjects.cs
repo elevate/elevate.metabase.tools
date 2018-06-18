@@ -218,6 +218,9 @@ namespace metabase_exporter
         [JsonProperty("parameter_id")]
         public string ParameterId { get; set; }
 
+        /// <summary>
+        /// References <see cref="Card.Id"/>
+        /// </summary>
         [JsonProperty("card_id")]
         public int CardId { get; set; }
 
