@@ -17,7 +17,14 @@ namespace metabase_exporter
         readonly HttpClient _http;
         AsyncLazy<string> sessionToken;
 
-        public MetabaseSessionTokenManager(MetabaseApiSettings settings)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="initialToken">
+        /// Optional. If defined, the API clients attempts to use this token instead of creating a new one.
+        /// </param>
+        public MetabaseSessionTokenManager(MetabaseApiSettings settings, string initialToken)
         {
             this._settings = settings;
             var handler = new HttpClientHandler {
@@ -25,11 +32,11 @@ namespace metabase_exporter
             };
             this._http = new HttpClient(handler)
             {
-                BaseAddress = new Uri(settings.MetabaseApiUrl),
+                BaseAddress = settings.MetabaseApiUrl,
             };
-            if (string.IsNullOrEmpty(settings.MetabaseInitialToken) == false)
+            if (string.IsNullOrEmpty(initialToken) == false)
             {
-                sessionToken = new AsyncLazy<string>(() => settings.MetabaseInitialToken);
+                sessionToken = new AsyncLazy<string>(() => initialToken);
             } else
             {
                 InvalidateSessionToken();

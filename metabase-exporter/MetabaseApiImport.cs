@@ -38,7 +38,7 @@ namespace metabase_exporter
             {
                 await api.MapAndCreateDashboard(dashboard, cardMapping);
             }
-            Console.WriteLine("Done");
+            Console.WriteLine("Done importing");
         }
 
         static void ValidateSourceDatabaseMapping(MetabaseState state, IReadOnlyDictionary<int, int> databaseMapping)
