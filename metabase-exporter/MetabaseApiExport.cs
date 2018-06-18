@@ -10,26 +10,23 @@ namespace metabase_exporter
     {
         public static async Task<MetabaseState> Export(this MetabaseApi api)
         {
-            var collections = await api.GetAllCollections();
-            var nonArchivedCollections = collections.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
-            var collectionMapping = Renumber(nonArchivedCollections.Select(x => x.Id).ToList());
-            foreach (var collection in nonArchivedCollections)
-            {
-                collection.Id = collectionMapping[collection.Id];
-            }
+            var mappedCollections = await api.GetMappedCollections();
+            var mappedCards = await api.GetMappedCards(mappedCollections.CollectionMapping);
+            var mappedDashboards = await api.GetMappedDashboards(mappedCards.CardMapping);
 
-            var cards = await api.GetAllCards();
-            var nonArchivedCards = cards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
-            var cardMapping = Renumber(nonArchivedCards.Select(x => x.Id).ToList());
-            foreach (var card in nonArchivedCards)
+            var state = new MetabaseState
             {
-                card.Id = cardMapping[card.Id];
-                if (card.CollectionId.HasValue)
-                {
-                    card.CollectionId = collectionMapping[card.CollectionId.Value];
-                }
-            }
+                Cards = mappedCards.Cards.ToArray(),
+                Dashboards = mappedDashboards.Dashboards.ToArray(),
+                Collections = mappedCollections.Collections.ToArray(),
+            };
 
+            return state;
+        }
+
+        static async Task<(IReadOnlyCollection<Dashboard> Dashboards, IReadOnlyDictionary<int, int> DashboardMapping)>
+            GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<int, int> cardMapping)
+        {
             var dashboards = await api.GetAllDashboards();
             var nonArchivedDashboards = dashboards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
             var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToList());
@@ -51,14 +48,38 @@ namespace metabase_exporter
                 }
             }
 
-            var state = new MetabaseState
-            {
-                Cards = nonArchivedCards,
-                Dashboards = nonArchivedDashboards,
-                Collections = nonArchivedCollections,
-            };
+            return (nonArchivedDashboards, dashboardMapping);
+        }
 
-            return state;
+        static async Task<(IReadOnlyCollection<Card> Cards, IReadOnlyDictionary<int, int> CardMapping)>
+            GetMappedCards(this MetabaseApi api, IReadOnlyDictionary<int, int> collectionMapping)
+        {
+            var cards = await api.GetAllCards();
+            var nonArchivedCards = cards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
+            var cardMapping = Renumber(nonArchivedCards.Select(x => x.Id).ToList());
+            foreach (var card in nonArchivedCards)
+            {
+                card.Id = cardMapping[card.Id];
+                if (card.CollectionId.HasValue)
+                {
+                    card.CollectionId = collectionMapping[card.CollectionId.Value];
+                }
+            }
+
+            return (nonArchivedCards, cardMapping);
+        }
+
+        static async Task<(IReadOnlyCollection<Collection> Collections, IReadOnlyDictionary<int, int> CollectionMapping)> 
+            GetMappedCollections(this MetabaseApi api)
+        {
+            var collections = await api.GetAllCollections();
+            var nonArchivedCollections = collections.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
+            var collectionMapping = Renumber(nonArchivedCollections.Select(x => x.Id).ToList());
+            foreach (var collection in nonArchivedCollections)
+            {
+                collection.Id = collectionMapping[collection.Id];
+            }
+            return (nonArchivedCollections, collectionMapping);
         }
 
         [Pure]
