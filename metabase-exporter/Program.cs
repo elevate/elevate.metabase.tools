@@ -164,11 +164,18 @@ namespace metabase_exporter
 
             var metabaseSession = new MetabaseSessionTokenManager(apiSettings, MetabaseInitialToken);
             var api = new MetabaseApi(metabaseSession);
-            await api.GetAllDashboards(); // attempt an API call to either validate or renew the session token
-            var token = await metabaseSession.CurrentToken();
-            File.WriteAllText(filename, token);
+            try
+            {
+                await api.GetAllDashboards(); // attempt an API call to either validate or renew the session token
+                var token = await metabaseSession.CurrentToken();
+                File.WriteAllText(filename, token);
 
-            return api;
+                return api;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error initialising Metabase API for " + apiSettings.MetabaseApiUrl, e);
+            }
         }
     }
 }
