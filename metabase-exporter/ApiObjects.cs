@@ -11,7 +11,7 @@ namespace metabase_exporter
     public class Card
     {
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public CardId Id { get; set; }
 
         [JsonProperty("description")]
         public string Description { get; set; }
@@ -29,7 +29,7 @@ namespace metabase_exporter
         public bool EnableEmbedding { get; set; }
 
         [JsonProperty("collection_id")]
-        public int? CollectionId { get; set; }
+        public CollectionId? CollectionId { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -110,7 +110,7 @@ namespace metabase_exporter
     public class Collection
     {
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public CollectionId Id { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -131,7 +131,7 @@ namespace metabase_exporter
     public class Dashboard
     {
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public DashboardId Id { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -176,7 +176,7 @@ namespace metabase_exporter
     public class DashboardCard
     {
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public DashboardCardId Id { get; set; }
 
         [JsonProperty("col")]
         public int Column { get; set; }
@@ -195,7 +195,7 @@ namespace metabase_exporter
         /// Otherwise references <see cref="Card.Id"/>
         /// </summary>
         [JsonProperty("card_id")]
-        public int? CardId { get; set; }
+        public CardId? CardId { get; set; }
 
         [JsonProperty("parameter_mappings")]
         public DashboardCardParameterMapping[] ParameterMappings { get; set; }
@@ -222,7 +222,7 @@ namespace metabase_exporter
         /// References <see cref="Card.Id"/>
         /// </summary>
         [JsonProperty("card_id")]
-        public int CardId { get; set; }
+        public CardId CardId { get; set; }
 
         [JsonProperty("target")]
         public object[] Target { get; set; }
