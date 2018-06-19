@@ -45,14 +45,7 @@ namespace metabase_exporter
             var dashboardCardMapping = await cards
                 .Where(card => card.CardId.HasValue)
                 .Traverse(async card => {
-                    var content1 = JObj.Obj(new[] { JObj.Prop("cardId", card.CardId.Value) });
-                    HttpRequestMessage request1() => 
-                        new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
-                        {
-                            Content = ToJsonContent(content1)
-                        };
-                    var response = await sessionManager.Send(request1);
-                    var dashboardCard = JsonConvert.DeserializeObject<DashboardCard>(response);
+                    var dashboardCard = await AddCardToDashboard(cardId: card.CardId.Value, dashboardId: dashboardId);
                     return new
                     {
                         stateDashboardCard = card, 
@@ -65,6 +58,11 @@ namespace metabase_exporter
                 card.stateDashboardCard.Id = card.newDashboardCard;
             }
 
+            await PutCardsToDashboard(dashboardId, cards);
+        }
+
+        async Task PutCardsToDashboard(int dashboardId, IReadOnlyCollection<DashboardCard> cards)
+        {
             var content = new Dictionary<string, object>
             {
                 {"cards", cards }
@@ -75,6 +73,19 @@ namespace metabase_exporter
                     Content = ToJsonContent(content)
                 };
             await sessionManager.Send(request);
+        }
+
+        async Task<DashboardCard> AddCardToDashboard(int cardId, int dashboardId)
+        {
+            var content1 = JObj.Obj(new[] { JObj.Prop("cardId", cardId) });
+            HttpRequestMessage request1() =>
+                new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
+                {
+                    Content = ToJsonContent(content1)
+                };
+            var response = await sessionManager.Send(request1);
+            var dashboardCard = JsonConvert.DeserializeObject<DashboardCard>(response);
+            return dashboardCard;
         }
 
         public async Task<Collection> CreateCollection(Collection collection)
