@@ -60,11 +60,16 @@ namespace metabase_exporter
             foreach (var card in nonArchivedCards)
             {
                 var newId = cardMapping[card.Id];
-                Console.WriteLine($"Mapping card {card.Id} to {newId} ({card.Name})");
+                var oldId = card.Id;
+                Console.WriteLine($"Mapping card {oldId} to {newId} ({card.Name})");
                 card.Id = newId;
                 if (card.CollectionId.HasValue)
                 {
                     card.CollectionId = collectionMapping[card.CollectionId.Value];
+                }
+                if (card.DatasetQuery.Native == null)
+                {
+                    Console.WriteLine($"WARNING: card {oldId} has a non-SQL definition. Its state might not be exported/imported correctly. ({card.Name})");
                 }
             }
 

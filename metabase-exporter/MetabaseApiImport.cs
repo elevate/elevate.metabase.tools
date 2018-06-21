@@ -33,6 +33,8 @@ namespace metabase_exporter
                     )
                 );
 
+            cardMapping = cardMapping.Where(m => m.Target != null).ToList();
+
             Console.WriteLine("Creating dashboards...");
             foreach (var dashboard in state.Dashboards)
             {
@@ -148,6 +150,11 @@ namespace metabase_exporter
 
         static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<int, int> databaseMapping)
         {
+            if (cardFromState.DatasetQuery.Native == null)
+            {
+                Console.WriteLine("WARNING: skipping card because it does not have a SQL definition: " + cardFromState.Name);
+                return null;
+            }
             Console.WriteLine($"Creating card '{cardFromState.Name}'");
             if (cardFromState.CollectionId.HasValue)
             {
