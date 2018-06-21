@@ -164,6 +164,7 @@ namespace metabase_exporter
                     .First();
             }
 
+            cardFromState.Description = string.IsNullOrEmpty(cardFromState.Description) ? null : cardFromState.Description;
             cardFromState.DatabaseId = databaseMapping[cardFromState.DatabaseId];
             cardFromState.DatasetQuery.DatabaseId = databaseMapping[cardFromState.DatasetQuery.DatabaseId];
             return await api.CreateCard(cardFromState);

@@ -71,6 +71,7 @@ namespace metabase_exporter
                 {
                     Console.WriteLine($"WARNING: card {oldId} has a non-SQL definition. Its state might not be exported/imported correctly. ({card.Name})");
                 }
+                card.Description = string.IsNullOrEmpty(card.Description) ? null : card.Description;
             }
 
             return (nonArchivedCards, cardMapping);
