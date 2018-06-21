@@ -25,15 +25,18 @@ namespace metabase_exporter
             await api.DeleteAllCards();
 
             Console.WriteLine("Creating cards...");
-            var cardMapping = await state.Cards
-                .Traverse(async cardFromState =>
-                    new Mapping<Card>(
-                        source: cardFromState,
-                        target: await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping)
-                    )
-                );
+            var partialCardMapping = await state.Cards
+                .Traverse(async cardFromState => {
+                    var source = cardFromState.Id;
+                    var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping);
+                    var mapping = new Mapping<int?>(source: source, target: target?.Id);
+                    return mapping;
+                });
 
-            cardMapping = cardMapping.Where(m => m.Target != null).ToList();
+            var cardMapping = partialCardMapping
+                .Where(x => x.Source.HasValue && x.Target.HasValue)
+                .Select(x => new Mapping<int>(x.Source.Value, x.Target.Value))
+                .ToList();
 
             Console.WriteLine("Creating dashboards...");
             foreach (var dashboard in state.Dashboards)
@@ -89,23 +92,23 @@ namespace metabase_exporter
             }
         }
 
-        static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard, IReadOnlyList<Mapping<Card>> cardMapping)
+        static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard, IReadOnlyList<Mapping<int>> cardMapping)
         {
             var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToList();
             Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
-            var newDashboard = await api.CreateDashboard(stateDashboard);
-            await api.AddCardsToDashboard(newDashboard.Id, mappedCards);
+            await api.CreateDashboard(stateDashboard);
+            await api.AddCardsToDashboard(stateDashboard.Id, mappedCards);
         }
 
-        static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<Card>> cardMapping)
+        static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<int>> cardMapping)
         {
             foreach (var card in stateDashboardCards)
             {
                 if (card.CardId.HasValue)
                 {
                     var mappedCardId = cardMapping
-                        .Where(x => x.Source.Id == card.CardId)
-                        .Select(x => (int?)x.Target.Id)
+                        .Where(x => x.Source == card.CardId)
+                        .Select(x => (int?)x.Target)
                         .FirstOrDefault();
 
                     if (mappedCardId.HasValue == false)
@@ -119,8 +122,8 @@ namespace metabase_exporter
                 foreach (var p in card.ParameterMappings)
                 {
                     p.CardId = cardMapping
-                        .Where(x => x.Source.Id == p.CardId)
-                        .Select(x => x.Target.Id)
+                        .Where(x => x.Source == p.CardId)
+                        .Select(x => x.Target)
                         .First();
                 }
                 yield return card;
@@ -181,7 +184,8 @@ namespace metabase_exporter
             cardFromState.Description = string.IsNullOrEmpty(cardFromState.Description) ? null : cardFromState.Description;
             cardFromState.DatabaseId = databaseMapping[cardFromState.DatabaseId];
             cardFromState.DatasetQuery.DatabaseId = databaseMapping[cardFromState.DatasetQuery.DatabaseId];
-            return await api.CreateCard(cardFromState);
+            await api.CreateCard(cardFromState);
+            return cardFromState;
         }
 
         class Mapping<T>

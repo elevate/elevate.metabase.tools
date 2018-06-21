@@ -18,7 +18,14 @@ namespace metabase_exporter
             this.sessionManager = sessionManager;
         }
 
-        public async Task<Card> CreateCard(Card card)
+        public async Task CreateCard(Card card)
+        {
+            var createdCard = await PostCard(card);
+            card.Id = createdCard.Id;
+            await PutCard(card);
+        }
+
+        async Task<Card> PostCard(Card card)
         {
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/card", UriKind.Relative))
@@ -29,7 +36,24 @@ namespace metabase_exporter
             return JsonConvert.DeserializeObject<Card>(response);
         }
 
-        public async Task<Dashboard> CreateDashboard(Dashboard dashboard)
+        async Task PutCard(Card card)
+        {
+            HttpRequestMessage request() =>
+                new HttpRequestMessage(HttpMethod.Put, new Uri("/api/card/" + card.Id, UriKind.Relative))
+                {
+                    Content = ToJsonContent(card)
+                };
+            var response = await sessionManager.Send(request);
+        }
+
+        public async Task CreateDashboard(Dashboard dashboard)
+        {
+            var createdDashboard = await PostDashboard(dashboard);
+            dashboard.Id = createdDashboard.Id;
+            await PutDashboard(dashboard);
+        }
+
+        async Task<Dashboard> PostDashboard(Dashboard dashboard)
         {
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/dashboard", UriKind.Relative))
@@ -38,6 +62,16 @@ namespace metabase_exporter
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Dashboard>(response);
+        }
+
+        async Task PutDashboard(Dashboard dashboard)
+        {
+            HttpRequestMessage request() =>
+                new HttpRequestMessage(HttpMethod.Put, new Uri("/api/dashboard/" + dashboard.Id, UriKind.Relative))
+                {
+                    Content = ToJsonContent(dashboard)
+                };
+            var response = await sessionManager.Send(request);
         }
 
         public async Task AddCardsToDashboard(int dashboardId, IReadOnlyList<DashboardCard> cards)
