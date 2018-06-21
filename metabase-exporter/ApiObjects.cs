@@ -28,6 +28,9 @@ namespace metabase_exporter
         [JsonProperty("enable_embedding")]
         public bool EnableEmbedding { get; set; }
 
+        [JsonProperty("embedding_params")]
+        public IDictionary<string, object> EmbeddingParams { get; set; }
+
         [JsonProperty("collection_id")]
         public int? CollectionId { get; set; }
 
