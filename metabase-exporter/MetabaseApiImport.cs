@@ -91,14 +91,30 @@ namespace metabase_exporter
 
         static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard, IReadOnlyList<Mapping<Card>> cardMapping)
         {
-            foreach (var card in stateDashboard.Cards)
+            var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToList();
+            Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
+            var newDashboard = await api.CreateDashboard(stateDashboard);
+            await api.AddCardsToDashboard(newDashboard.Id, mappedCards);
+        }
+
+        static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<Card>> cardMapping)
+        {
+            foreach (var card in stateDashboardCards)
             {
                 if (card.CardId.HasValue)
                 {
-                    card.CardId = cardMapping
+                    var mappedCardId = cardMapping
                         .Where(x => x.Source.Id == card.CardId)
-                        .Select(x => x.Target.Id)
-                        .First();
+                        .Select(x => (int?)x.Target.Id)
+                        .FirstOrDefault();
+
+                    if (mappedCardId.HasValue == false)
+                    {
+                        Console.WriteLine("WARNING: skipping card because it could not be found in the mappings: " + card.Id);
+                        continue;
+                    }
+
+                    card.CardId = mappedCardId.Value;
                 }
                 foreach (var p in card.ParameterMappings)
                 {
@@ -107,10 +123,8 @@ namespace metabase_exporter
                         .Select(x => x.Target.Id)
                         .First();
                 }
+                yield return card;
             }
-            Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
-            var newDashboard = await api.CreateDashboard(stateDashboard);
-            await api.AddCardsToDashboard(newDashboard.Id, stateDashboard.Cards);
         }
 
         static async Task<IReadOnlyList<Mapping<Collection>>> MapAndCreateCollections(this MetabaseApi api, IReadOnlyList<Collection> stateCollections)
