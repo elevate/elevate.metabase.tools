@@ -171,6 +171,9 @@ namespace metabase_exporter
 
         [JsonProperty("type")]
         public string Type { get; set; }
+
+        [JsonProperty("default")]
+        public string Default { get; set; }
     }
 
     /// <summary>
