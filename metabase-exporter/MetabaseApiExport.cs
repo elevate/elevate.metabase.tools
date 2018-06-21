@@ -59,7 +59,9 @@ namespace metabase_exporter
             var cardMapping = Renumber(nonArchivedCards.Select(x => x.Id).ToList());
             foreach (var card in nonArchivedCards)
             {
-                card.Id = cardMapping[card.Id];
+                var newId = cardMapping[card.Id];
+                Console.WriteLine($"Mapping card {card.Id} to {newId} ({card.Name})");
+                card.Id = newId;
                 if (card.CollectionId.HasValue)
                 {
                     card.CollectionId = collectionMapping[card.CollectionId.Value];
