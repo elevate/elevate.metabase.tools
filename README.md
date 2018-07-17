@@ -6,6 +6,12 @@ Tools for managing [Metabase](https://www.metabase.com/)
 Used to export/import the current state of Metabase (questions/dashboards/collections) to/from a JSON file. 
 This file can then be stored on git for versioning.
 
+## Limitations
+
+This tool currently exports/imports collections, dashboards and SQL-defined questions only. 
+Other kinds of questions are not supported because they are hard to make portable across Metabase instances.
+Other features (e.g. pulses) are not supported simply because I don't need them :)
+
 ## Usage
 
 Parameters can be given via command-line, appsettings.json or environment variables.
