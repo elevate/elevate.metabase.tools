@@ -30,7 +30,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/card", UriKind.Relative))
                 {
-                    Content = ToJsonContent(card)
+                    Content = ToJsonContent(card).Item1
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Card>(response);
@@ -41,7 +41,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Put, new Uri("/api/card/" + card.Id, UriKind.Relative))
                 {
-                    Content = ToJsonContent(card)
+                    Content = ToJsonContent(card).Item1
                 };
             var response = await sessionManager.Send(request);
         }
@@ -58,7 +58,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/dashboard", UriKind.Relative))
                 {
-                    Content = ToJsonContent(dashboard)
+                    Content = ToJsonContent(dashboard).Item1
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Dashboard>(response);
@@ -69,7 +69,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Put, new Uri("/api/dashboard/" + dashboard.Id, UriKind.Relative))
                 {
-                    Content = ToJsonContent(dashboard)
+                    Content = ToJsonContent(dashboard).Item1
                 };
             var response = await sessionManager.Send(request);
         }
@@ -101,12 +101,22 @@ namespace metabase_exporter
             {
                 {"cards", cards }
             };
-            HttpRequestMessage request() =>
-                new HttpRequestMessage(HttpMethod.Put, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
-                {
-                    Content = ToJsonContent(content)
-                };
-            await sessionManager.Send(request);
+            var jsonContent = ToJsonContent(content);
+            
+            try
+            {
+                HttpRequestMessage request() =>
+                    new HttpRequestMessage(HttpMethod.Put, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
+                    {
+                        Content = jsonContent.Item1
+                    };
+
+                await sessionManager.Send(request);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Error putting cards to dashboard {dashboardId}:\n{jsonContent.Item2}", e);
+            }
         }
 
         async Task<DashboardCard> AddCardToDashboard(int cardId, int dashboardId)
@@ -115,7 +125,7 @@ namespace metabase_exporter
             HttpRequestMessage request1() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
                 {
-                    Content = ToJsonContent(content1)
+                    Content = ToJsonContent(content1).Item1
                 };
             var response = await sessionManager.Send(request1);
             var dashboardCard = JsonConvert.DeserializeObject<DashboardCard>(response);
@@ -127,16 +137,17 @@ namespace metabase_exporter
             HttpRequestMessage request() => 
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/collection", UriKind.Relative))
                 {
-                    Content = ToJsonContent(collection)
+                    Content = ToJsonContent(collection).Item1
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Collection>(response);
         }
 
-        static StringContent ToJsonContent(object o)
+        static (StringContent, string) ToJsonContent(object o)
         {
             var json = JsonConvert.SerializeObject(o);
-            return new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            return (content, json);
         }
 
         public async Task DeleteCard(int cardId)
