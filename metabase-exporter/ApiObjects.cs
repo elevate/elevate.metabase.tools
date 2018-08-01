@@ -210,7 +210,37 @@ namespace metabase_exporter
         public JObject VisualizationSettings { get; set; }
 
         [JsonProperty("series")]
-        public object[] Series { get; set; }
+        public DashboardSeriesCard[] Series { get; set; }
+    }
+
+    /// <summary>
+    /// A reference to a <see cref="Card"/> in a series (i.e. 2 or more overlapped graphs) in a dashboard.
+    /// </summary>
+    public class DashboardSeriesCard
+    {
+        /// <summary>
+        /// References <see cref="Card.Id"/>
+        /// </summary>
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        [JsonProperty("collection_id")]
+        public int? CollectionId { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("display")]
+        public string Display { get; set; }
+
+        [JsonProperty("dataset_query")]
+        public DatasetQuery DatasetQuery { get; set; }
+
+        [JsonProperty("visualization_settings")]
+        public JObject VisualizationSettings { get; set; } // ?
     }
 
     /// <summary>

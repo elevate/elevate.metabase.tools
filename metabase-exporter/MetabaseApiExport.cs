@@ -45,6 +45,11 @@ namespace metabase_exporter
                     {
                         parameter.CardId = cardMapping[parameter.CardId];
                     }
+
+                    foreach (var seriesCard in card.Series)
+                    {
+                        seriesCard.Id = cardMapping[seriesCard.Id];
+                    }
                 }
             }
 

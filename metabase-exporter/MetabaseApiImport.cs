@@ -126,6 +126,14 @@ namespace metabase_exporter
                         .Select(x => x.Target)
                         .First();
                 }
+
+                foreach (var s in card.Series)
+                {
+                    s.Id = cardMapping
+                        .Where(x => x.Source == s.Id)
+                        .Select(x => x.Target)
+                        .First();
+                }
                 yield return card;
             }
         }
