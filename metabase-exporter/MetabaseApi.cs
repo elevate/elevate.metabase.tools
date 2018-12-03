@@ -30,7 +30,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/card", UriKind.Relative))
                 {
-                    Content = ToJsonContent(card).Item1
+                    Content = ToJsonContent(card).HttpContent
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Card>(response);
@@ -41,7 +41,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Put, new Uri("/api/card/" + card.Id, UriKind.Relative))
                 {
-                    Content = ToJsonContent(card).Item1
+                    Content = ToJsonContent(card).HttpContent
                 };
             var response = await sessionManager.Send(request);
         }
@@ -58,7 +58,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/dashboard", UriKind.Relative))
                 {
-                    Content = ToJsonContent(dashboard).Item1
+                    Content = ToJsonContent(dashboard).HttpContent
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Dashboard>(response);
@@ -69,7 +69,7 @@ namespace metabase_exporter
             HttpRequestMessage request() =>
                 new HttpRequestMessage(HttpMethod.Put, new Uri("/api/dashboard/" + dashboard.Id, UriKind.Relative))
                 {
-                    Content = ToJsonContent(dashboard).Item1
+                    Content = ToJsonContent(dashboard).HttpContent
                 };
             var response = await sessionManager.Send(request);
         }
@@ -108,14 +108,14 @@ namespace metabase_exporter
                 HttpRequestMessage request() =>
                     new HttpRequestMessage(HttpMethod.Put, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
                     {
-                        Content = jsonContent.Item1
+                        Content = jsonContent.HttpContent
                     };
 
                 await sessionManager.Send(request);
             }
             catch (Exception e)
             {
-                throw new Exception($"Error putting cards to dashboard {dashboardId}:\n{jsonContent.Item2}", e);
+                throw new Exception($"Error putting cards to dashboard {dashboardId}:\n{jsonContent.Json}", e);
             }
         }
 
@@ -125,7 +125,7 @@ namespace metabase_exporter
             HttpRequestMessage request1() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
                 {
-                    Content = ToJsonContent(content1).Item1
+                    Content = ToJsonContent(content1).HttpContent
                 };
             var response = await sessionManager.Send(request1);
             var dashboardCard = JsonConvert.DeserializeObject<DashboardCard>(response);
@@ -137,13 +137,13 @@ namespace metabase_exporter
             HttpRequestMessage request() => 
                 new HttpRequestMessage(HttpMethod.Post, new Uri("/api/collection", UriKind.Relative))
                 {
-                    Content = ToJsonContent(collection).Item1
+                    Content = ToJsonContent(collection).HttpContent
                 };
             var response = await sessionManager.Send(request);
             return JsonConvert.DeserializeObject<Collection>(response);
         }
 
-        static (StringContent, string) ToJsonContent(object o)
+        static (StringContent HttpContent, string Json) ToJsonContent(object o)
         {
             var json = JsonConvert.SerializeObject(o);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
