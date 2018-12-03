@@ -74,7 +74,7 @@ namespace metabase_exporter
             var response = await sessionManager.Send(request);
         }
 
-        public async Task AddCardsToDashboard(int dashboardId, IReadOnlyList<DashboardCard> cards)
+        public async Task AddCardsToDashboard(DashboardId dashboardId, IReadOnlyList<DashboardCard> cards)
         {
             var dashboardCardMapping = await cards
                 .Where(card => card.CardId.HasValue)
@@ -95,7 +95,7 @@ namespace metabase_exporter
             await PutCardsToDashboard(dashboardId, cards);
         }
 
-        async Task PutCardsToDashboard(int dashboardId, IReadOnlyCollection<DashboardCard> cards)
+        async Task PutCardsToDashboard(DashboardId dashboardId, IReadOnlyCollection<DashboardCard> cards)
         {
             var content = new Dictionary<string, object>
             {
@@ -119,9 +119,9 @@ namespace metabase_exporter
             }
         }
 
-        async Task<DashboardCard> AddCardToDashboard(int cardId, int dashboardId)
+        async Task<DashboardCard> AddCardToDashboard(CardId cardId, DashboardId dashboardId)
         {
-            var content1 = JObj.Obj(new[] { JObj.Prop("cardId", cardId) });
+            var content1 = JObj.Obj(new[] { JObj.Prop("cardId", cardId.Value) });
             HttpRequestMessage request1() =>
                 new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
                 {
@@ -150,13 +150,13 @@ namespace metabase_exporter
             return (content, json);
         }
 
-        public async Task DeleteCard(int cardId)
+        public async Task DeleteCard(CardId cardId)
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Delete, new Uri("/api/card/"+cardId, UriKind.Relative));
             var response = await sessionManager.Send(request);
         }
 
-        public async Task DeleteDashboard(int dashboardId)
+        public async Task DeleteDashboard(DashboardId dashboardId)
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Delete, new Uri("/api/dashboard/" + dashboardId, UriKind.Relative));
             var response = await sessionManager.Send(request);
@@ -185,7 +185,7 @@ namespace metabase_exporter
             return await dashboards.Traverse(async dashboard => await GetDashboard(dashboard.Id));
         }
 
-        public async Task<Dashboard> GetDashboard(int dashboardId)
+        public async Task<Dashboard> GetDashboard(DashboardId dashboardId)
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/dashboard/" + dashboardId, UriKind.Relative));
             var response = await sessionManager.Send(request);

@@ -24,8 +24,8 @@ namespace metabase_exporter
             return state;
         }
 
-        static async Task<(IReadOnlyCollection<Dashboard> Dashboards, IReadOnlyDictionary<int, int> DashboardMapping)>
-            GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<int, int> cardMapping)
+        static async Task<(IReadOnlyCollection<Dashboard> Dashboards, IReadOnlyDictionary<DashboardId, DashboardId> DashboardMapping)>
+            GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<CardId, CardId> cardMapping)
         {
             var dashboards = await api.GetAllDashboards();
             var nonArchivedDashboards = dashboards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
@@ -56,8 +56,8 @@ namespace metabase_exporter
             return (nonArchivedDashboards, dashboardMapping);
         }
 
-        static async Task<(IReadOnlyCollection<Card> Cards, IReadOnlyDictionary<int, int> CardMapping)>
-            GetMappedCards(this MetabaseApi api, IReadOnlyDictionary<int, int> collectionMapping)
+        static async Task<(IReadOnlyCollection<Card> Cards, IReadOnlyDictionary<CardId, CardId> CardMapping)>
+            GetMappedCards(this MetabaseApi api, IReadOnlyDictionary<CollectionId, CollectionId> collectionMapping)
         {
             var cards = await api.GetAllCards();
             var nonArchivedCards = cards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
@@ -82,7 +82,7 @@ namespace metabase_exporter
             return (nonArchivedCards, cardMapping);
         }
 
-        static async Task<(IReadOnlyCollection<Collection> Collections, IReadOnlyDictionary<int, int> CollectionMapping)> 
+        static async Task<(IReadOnlyCollection<Collection> Collections, IReadOnlyDictionary<CollectionId, CollectionId> CollectionMapping)> 
             GetMappedCollections(this MetabaseApi api)
         {
             var collections = await api.GetAllCollections();
@@ -96,9 +96,9 @@ namespace metabase_exporter
         }
 
         [Pure]
-        static IReadOnlyDictionary<int, int> Renumber(IReadOnlyCollection<int> ids) =>
+        static IReadOnlyDictionary<T, T> Renumber<T>(IReadOnlyCollection<T> ids) where T: INewTypeComp<T, int>, new() =>
             ids.OrderBy(x => x)
             .Select((originalValue, newValue) => new { originalValue, newValue = newValue + 1 })
-            .ToDictionary(x => x.originalValue, x => x.newValue);
+            .ToDictionary(x => x.originalValue, x => new T().New(x.newValue));
     }
 }

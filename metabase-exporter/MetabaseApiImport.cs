@@ -29,13 +29,13 @@ namespace metabase_exporter
                 .Traverse(async cardFromState => {
                     var source = cardFromState.Id;
                     var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping);
-                    var mapping = new Mapping<int?>(source: source, target: target?.Id);
+                    var mapping = new Mapping<CardId?>(source: source, target: target?.Id);
                     return mapping;
                 });
 
             var cardMapping = partialCardMapping
                 .Where(x => x.Source.HasValue && x.Target.HasValue)
-                .Select(x => new Mapping<int>(x.Source.Value, x.Target.Value))
+                .Select(x => new Mapping<CardId>(x.Source.Value, x.Target.Value))
                 .ToList();
 
             Console.WriteLine("Creating dashboards...");
@@ -92,7 +92,7 @@ namespace metabase_exporter
             }
         }
 
-        static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard, IReadOnlyList<Mapping<int>> cardMapping)
+        static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard, IReadOnlyList<Mapping<CardId>> cardMapping)
         {
             var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToList();
             Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
@@ -100,7 +100,7 @@ namespace metabase_exporter
             await api.AddCardsToDashboard(stateDashboard.Id, mappedCards);
         }
 
-        static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<int>> cardMapping)
+        static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<CardId>> cardMapping)
         {
             foreach (var card in stateDashboardCards)
             {
@@ -108,7 +108,7 @@ namespace metabase_exporter
                 {
                     var mappedCardId = cardMapping
                         .Where(x => x.Source == card.CardId)
-                        .Select(x => (int?)x.Target)
+                        .Select(x => (CardId?)x.Target)
                         .FirstOrDefault();
 
                     if (mappedCardId.HasValue == false)
