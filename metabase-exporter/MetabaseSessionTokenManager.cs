@@ -56,7 +56,7 @@ namespace metabase_exporter
                     var response2 = await SendWithSessionToken(request());
                     return response2.Switch(
                         (HttpResponse.Ok ok) => ok.Content,
-                        (HttpResponse.Unauthorized u2) => throw new Exception("Got unauthorized response from Metabase")
+                        (HttpResponse.Unauthorized u2) => throw new MetabaseApiException("Got unauthorized response from Metabase")
                     );
                 }
             );
@@ -81,7 +81,7 @@ namespace metabase_exporter
             else
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Error sending request to Metabase: {request.Method} {request.RequestUri}\nStatus code: {response.StatusCode}\nResponse: {responseContent}");
+                throw new MetabaseApiException($"Error sending request to Metabase: {request.Method} {request.RequestUri}\nStatus code: {response.StatusCode}\nResponse: {responseContent}");
             }
         }
 
@@ -107,7 +107,7 @@ namespace metabase_exporter
             var response = await _http.PostAsync(endpoint, requestContent);
             if (response.IsSuccessStatusCode == false)
             {
-                throw new Exception("Error logging in to Metabase API. Status code: " + response.StatusCode);
+                throw new MetabaseApiException("Error logging in to Metabase API. Status code: " + response.StatusCode);
             }
             var rawContent = await response.Content.ReadAsStringAsync();
             try
@@ -117,7 +117,7 @@ namespace metabase_exporter
             }
             catch (Exception e)
             {
-                throw new Exception("Error parsing session token response from:\n" + rawContent, e);
+                throw new MetabaseApiException("Error parsing session token response from:\n" + rawContent, e);
             }
         }
 
