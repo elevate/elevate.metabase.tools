@@ -10,7 +10,9 @@ using System.Threading.Tasks;
 
 namespace metabase_exporter
 {
-
+    /// <summary>
+    /// Manages the Metabase session token. Gets/renews token as needed.
+    /// </summary>
     public class MetabaseSessionTokenManager
     {
         readonly MetabaseApiSettings _settings;
@@ -18,7 +20,7 @@ namespace metabase_exporter
         AsyncLazy<string> sessionToken;
 
         /// <summary>
-        /// 
+        /// Manages the Metabase session token. Gets/renews token as needed.
         /// </summary>
         /// <param name="settings"></param>
         /// <param name="initialToken">

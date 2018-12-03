@@ -6,8 +6,16 @@ using System.Threading.Tasks;
 
 namespace metabase_exporter
 {
+    /// <summary>
+    /// Export Metabase data
+    /// </summary>
     public static class MetabaseApiExport
     {
+        /// <summary>
+        /// Export Metabase data
+        /// </summary>
+        /// <param name="api"></param>
+        /// <returns></returns>
         public static async Task<MetabaseState> Export(this MetabaseApi api)
         {
             var mappedCollections = await api.GetMappedCollections();

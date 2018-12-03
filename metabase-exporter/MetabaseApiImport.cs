@@ -6,8 +6,18 @@ using System.Threading.Tasks;
 
 namespace metabase_exporter
 {
-    static class MetabaseApiImport
+    /// <summary>
+    /// Imports Metabase data. DELETES all current dashboards/questions/etc.
+    /// </summary>
+    public static class MetabaseApiImport
     {
+        /// <summary>
+        /// Imports Metabase data. DELETES all current dashboards/questions/etc.
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="state"></param>
+        /// <param name="databaseMapping"></param>
+        /// <returns></returns>
         public static async Task Import(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
         {
             // firstly check that the database mapping is complete and correct

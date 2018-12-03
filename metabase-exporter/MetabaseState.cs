@@ -2,6 +2,9 @@
 
 namespace metabase_exporter
 {
+    /// <summary>
+    /// Root object for Metabase data for import/export operations 
+    /// </summary>
     public class MetabaseState
     {
         [JsonProperty("collections")]
