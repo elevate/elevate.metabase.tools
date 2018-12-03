@@ -71,7 +71,7 @@ namespace metabase_exporter
             throw new Exception($"Invalid command '{command}', must be either 'import' or 'export'");
         }
 
-        static IReadOnlyDictionary<int, int> ParseDatabaseMapping(IConfiguration rawConfig)
+        static IReadOnlyDictionary<DatabaseId, DatabaseId> ParseDatabaseMapping(IConfiguration rawConfig)
         {
             var rawDatabaseMapping = rawConfig.GetSection("DatabaseMapping");
             if (rawDatabaseMapping == null)
@@ -79,13 +79,13 @@ namespace metabase_exporter
                 throw new Exception("Missing section DatabaseMapping");
             }
 
-            var dict = new Dictionary<int, int>();
+            var dict = new Dictionary<DatabaseId, DatabaseId>();
             foreach (var kv in rawDatabaseMapping.GetChildren())
             {
                 try
                 {
-                    var key = int.Parse(kv.Key);
-                    var value = int.Parse(kv.Value);
+                    var key = new DatabaseId(int.Parse(kv.Key));
+                    var value = new DatabaseId(int.Parse(kv.Value));
                     dict.Add(key, value);
                 }
                 catch (Exception e)

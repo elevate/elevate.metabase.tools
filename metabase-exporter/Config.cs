@@ -30,9 +30,9 @@ namespace metabase_exporter
         public sealed class Import: Config
         {
             public string InputFilename { get; }
-            public IReadOnlyDictionary<int, int> DatabaseMapping { get; }
+            public IReadOnlyDictionary<DatabaseId, DatabaseId> DatabaseMapping { get; }
 
-            public Import(MetabaseApiSettings MetabaseApiSettings, string inputFilename, IReadOnlyDictionary<int, int> databaseMapping): base(MetabaseApiSettings)
+            public Import(MetabaseApiSettings MetabaseApiSettings, string inputFilename, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping): base(MetabaseApiSettings)
             {
                 InputFilename = inputFilename;
                 DatabaseMapping = databaseMapping;

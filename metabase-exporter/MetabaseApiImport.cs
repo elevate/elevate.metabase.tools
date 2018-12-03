@@ -8,7 +8,7 @@ namespace metabase_exporter
 {
     static class MetabaseApiImport
     {
-        public static async Task Import(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<int, int> databaseMapping)
+        public static async Task Import(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
         {
             // firstly check that the database mapping is complete and correct
             await api.ValidateDatabaseMapping(state, databaseMapping);
@@ -46,7 +46,7 @@ namespace metabase_exporter
             Console.WriteLine("Done importing");
         }
 
-        static void ValidateSourceDatabaseMapping(MetabaseState state, IReadOnlyDictionary<int, int> databaseMapping)
+        static void ValidateSourceDatabaseMapping(MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
         {
             var allDatabaseIds = state.Cards.SelectMany(c => new[] { c.DatabaseId, c.DatasetQuery.DatabaseId });
             var missingDatabaseIdsInMapping = allDatabaseIds.Where(x => databaseMapping.ContainsKey(x) == false).Distinct().ToList();
@@ -56,7 +56,7 @@ namespace metabase_exporter
             }
         }
 
-        static async Task ValidateTargetDatabaseMapping(this MetabaseApi api, IReadOnlyDictionary<int, int> databaseMapping)
+        static async Task ValidateTargetDatabaseMapping(this MetabaseApi api, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
         {
             var databaseIds = await api.GetAllDatabaseIds();
             var incorrectMappings = databaseMapping.Where(kv => databaseIds.Contains(kv.Value) == false).ToList();
@@ -67,7 +67,7 @@ namespace metabase_exporter
             }
         }
 
-        static async Task ValidateDatabaseMapping(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<int, int> databaseMapping)
+        static async Task ValidateDatabaseMapping(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
         {
             ValidateSourceDatabaseMapping(state, databaseMapping);
             await api.ValidateTargetDatabaseMapping(databaseMapping);
@@ -173,7 +173,7 @@ namespace metabase_exporter
             return collectionMapping;
         }
 
-        static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<int, int> databaseMapping)
+        static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
         {
             if (cardFromState.DatasetQuery.Native == null)
             {

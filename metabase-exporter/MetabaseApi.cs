@@ -192,12 +192,12 @@ namespace metabase_exporter
             return JsonConvert.DeserializeObject<Dashboard>(response);
         }
 
-        public async Task<IReadOnlyList<int>> GetAllDatabaseIds()
+        public async Task<IReadOnlyList<DatabaseId>> GetAllDatabaseIds()
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/database", UriKind.Relative));
             var response = await sessionManager.Send(request);
             var databases = JsonConvert.DeserializeObject<JArray>(response);
-            return databases.Select(d => (int)d["id"]).ToList();
+            return databases.Select(d => new DatabaseId((int)d["id"])).ToList();
         }
     }
 }

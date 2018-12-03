@@ -106,4 +106,29 @@ namespace metabase_exporter
         public static bool operator !=(DashboardCardId a, DashboardCardId b) => !(a == b);
 
     }
+
+    [JsonConverter(typeof(IdJsonConverter<DatabaseId>))]
+    public struct DatabaseId : INewTypeComp<DatabaseId, int>
+    {
+        public int Value { get; }
+
+        public DatabaseId(int value)
+        {
+            Value = value;
+        }
+
+        public int CompareTo(DatabaseId other) => Value.CompareTo(other.Value);
+        public bool Equals(DatabaseId other) => Value.Equals(other.Value);
+        public DatabaseId New(int value) => new DatabaseId(value);
+
+        public override int GetHashCode() => Value.GetHashCode();
+        public override string ToString() => Value.ToString();
+
+        public static bool operator >(DatabaseId a, DatabaseId b) => a.CompareTo(b) > 0;
+        public static bool operator <(DatabaseId a, DatabaseId b) => a.CompareTo(b) < 0;
+        public static bool operator <=(DatabaseId a, DatabaseId b) => a.CompareTo(b) <= 0;
+        public static bool operator >=(DatabaseId a, DatabaseId b) => a.CompareTo(b) >= 0;
+        public static bool operator ==(DatabaseId a, DatabaseId b) => a.CompareTo(b) == 0;
+        public static bool operator !=(DatabaseId a, DatabaseId b) => !(a == b);
+    }
 }

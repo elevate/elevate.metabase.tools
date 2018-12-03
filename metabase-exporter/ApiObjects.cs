@@ -23,7 +23,7 @@ namespace metabase_exporter
         public JObject[] ResultMetadata { get; set; }
 
         [JsonProperty("database_id")]
-        public int DatabaseId { get; set; }
+        public DatabaseId DatabaseId { get; set; }
 
         [JsonProperty("enable_embedding")]
         public bool EnableEmbedding { get; set; }
@@ -65,7 +65,7 @@ namespace metabase_exporter
     public class DatasetQuery
     {
         [JsonProperty("database")]
-        public int DatabaseId { get; set; }
+        public DatabaseId DatabaseId { get; set; }
 
         [JsonProperty("type")]
         public string Type { get; set; }
