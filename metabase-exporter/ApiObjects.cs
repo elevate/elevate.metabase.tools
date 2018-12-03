@@ -22,6 +22,9 @@ namespace metabase_exporter
         [JsonProperty("result_metadata")]
         public JObject[] ResultMetadata { get; set; }
 
+        [JsonProperty("metadata_checksum")]
+        public string MetadataChecksum => GeneralExtensions.MD5Base64(JsonConvert.SerializeObject(ResultMetadata));
+
         [JsonProperty("database_id")]
         public DatabaseId DatabaseId { get; set; }
 

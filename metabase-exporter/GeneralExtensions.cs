@@ -38,5 +38,13 @@ namespace metabase_exporter
             return results;
         }
 
+        public static string MD5Base64(string x)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create()) {
+                byte[] md5Value = md5.ComputeHash(Encoding.UTF8.GetBytes(x));
+                return Convert.ToBase64String(md5Value);
+            }            
+        }
+
     }
 }
