@@ -266,4 +266,19 @@ namespace metabase_exporter
         [JsonProperty("target")]
         public object[] Target { get; set; }
     }
+
+    public class RunCardResult
+    {
+        /// <summary>
+        /// "completed", "failed", ... 
+        /// </summary>
+        [JsonProperty("status")]
+        public string Status { get; set; }
+        
+        /// <summary>
+        /// If <see cref="Status"/> == "failed"
+        /// </summary>
+        [JsonProperty("error")]
+        public string Error { get; set; }
+    }
 }

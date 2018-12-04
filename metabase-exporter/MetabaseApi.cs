@@ -199,5 +199,12 @@ namespace metabase_exporter
             var databases = JsonConvert.DeserializeObject<JArray>(response);
             return databases.Select(d => new DatabaseId((int)d["id"])).ToList();
         }
+
+        public async Task<RunCardResult> RunCard(CardId card)
+        {
+            HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/card/{card}/query", UriKind.Relative));
+            var response = await sessionManager.Send(request);
+            return JsonConvert.DeserializeObject<RunCardResult>(response);
+        }
     }
 }

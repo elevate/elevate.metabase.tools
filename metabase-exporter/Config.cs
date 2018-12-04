@@ -12,7 +12,7 @@ namespace metabase_exporter
 
         public MetabaseApiSettings MetabaseApiSettings { get; }
 
-        public abstract T Switch<T>(Func<Export, T> export, Func<Import, T> import);
+        public abstract T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions);
 
         public sealed class Export: Config
         {
@@ -23,7 +23,7 @@ namespace metabase_exporter
                 OutputFilename = outputFilename;
             }
 
-            public override T Switch<T>(Func<Export, T> export, Func<Import, T> import) =>
+            public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
                 export(this);
         }
 
@@ -38,8 +38,16 @@ namespace metabase_exporter
                 DatabaseMapping = databaseMapping;
             }
 
-            public override T Switch<T>(Func<Export, T> export, Func<Import, T> import) =>
+            public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
                 import(this);
+        }
+        
+        public sealed class TestQuestions: Config
+        {
+            public TestQuestions(MetabaseApiSettings metabaseApiSettings) : base(metabaseApiSettings){}
+
+            public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
+                testQuestions(this);
         }
     }
 }

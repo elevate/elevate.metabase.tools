@@ -24,7 +24,10 @@ namespace metabase_exporter
             var rawConfig = builder.Build();
             var config = ParseConfig(rawConfig);
             var api = await InitApi(config.MetabaseApiSettings);
-            await config.Switch(api.Export, api.Import);
+            await config.Switch(
+                export: api.Export, 
+                import: api.Import, 
+                testQuestions: _ => api.TestQuestions());
         }
 
         static async Task Export(this MetabaseApi api, Config.Export export)
@@ -68,7 +71,12 @@ namespace metabase_exporter
                 }
                 return new Config.Export(apiSettings, outputFilename);
             }
-            throw new Exception($"Invalid command '{command}', must be either 'import' or 'export'");
+            else if (StringComparer.InvariantCultureIgnoreCase.Equals(command, "test-questions"))
+            {
+                var apiSettings = ParseApiSettings(rawConfig);
+                return new Config.TestQuestions(apiSettings);
+            }
+            throw new Exception($"Invalid command '{command}', must be either 'import' or 'export' or 'test-questions'");
         }
 
         static IReadOnlyDictionary<DatabaseId, DatabaseId> ParseDatabaseMapping(IConfiguration rawConfig)
