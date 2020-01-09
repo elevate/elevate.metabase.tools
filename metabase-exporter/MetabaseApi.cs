@@ -173,6 +173,7 @@ namespace metabase_exporter
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/collection", UriKind.Relative));
             var response = await sessionManager.Send(request);
+            response = response.Replace("\"id\":\"root\"", "\"id\":\"0\"");
             return JsonConvert.DeserializeObject<Collection[]>(response);
         }
 
