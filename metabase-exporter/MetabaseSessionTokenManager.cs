@@ -38,7 +38,7 @@ namespace metabase_exporter
             };
             if (string.IsNullOrEmpty(initialToken) == false)
             {
-                sessionToken = new AsyncLazy<string>(() => initialToken);
+                sessionToken = new AsyncLazy<string>(() => Task.FromResult(initialToken));
             } else
             {
                 InvalidateSessionToken();
