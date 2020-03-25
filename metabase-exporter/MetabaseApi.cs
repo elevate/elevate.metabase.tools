@@ -33,7 +33,14 @@ namespace metabase_exporter
                     Content = ToJsonContent(card).HttpContent
                 };
             var response = await sessionManager.Send(request);
-            return JsonConvert.DeserializeObject<Card>(response);
+            try
+            {
+                return JsonConvert.DeserializeObject<Card>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Card)} from:\n{response}", e);
+            }
         }
 
         async Task PutCard(Card card)
@@ -61,7 +68,14 @@ namespace metabase_exporter
                     Content = ToJsonContent(dashboard).HttpContent
                 };
             var response = await sessionManager.Send(request);
-            return JsonConvert.DeserializeObject<Dashboard>(response);
+            try
+            {
+                return JsonConvert.DeserializeObject<Dashboard>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Dashboard)} from:\n{response}", e);
+            }
         }
 
         async Task PutDashboard(Dashboard dashboard)
@@ -115,7 +129,7 @@ namespace metabase_exporter
             }
             catch (Exception e)
             {
-                throw new Exception($"Error putting cards to dashboard {dashboardId}:\n{jsonContent.Json}", e);
+                throw new MetabaseApiException($"Error putting cards to dashboard {dashboardId}:\n{jsonContent.Json}", e);
             }
         }
 
@@ -128,8 +142,14 @@ namespace metabase_exporter
                     Content = ToJsonContent(content1).HttpContent
                 };
             var response = await sessionManager.Send(request1);
-            var dashboardCard = JsonConvert.DeserializeObject<DashboardCard>(response);
-            return dashboardCard;
+            try
+            {
+                return JsonConvert.DeserializeObject<DashboardCard>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(DashboardCard)} from:\n{response}", e);
+            }
         }
 
         public async Task<Collection> CreateCollection(Collection collection)
@@ -140,7 +160,14 @@ namespace metabase_exporter
                     Content = ToJsonContent(collection).HttpContent
                 };
             var response = await sessionManager.Send(request);
-            return JsonConvert.DeserializeObject<Collection>(response);
+            try
+            {
+                return JsonConvert.DeserializeObject<Collection>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Collection)} from:\n{response}", e);
+            }
         }
 
         static (StringContent HttpContent, string Json) ToJsonContent(object o)
@@ -174,7 +201,14 @@ namespace metabase_exporter
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/collection", UriKind.Relative));
             var response = await sessionManager.Send(request);
             response = response.Replace("\"id\":\"root\"", "\"id\":\"0\"");
-            return JsonConvert.DeserializeObject<Collection[]>(response);
+            try
+            {
+                return JsonConvert.DeserializeObject<Collection[]>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Collection)} array from:\n{response}", e);
+            }
         }
 
         public async Task<IReadOnlyList<Dashboard>> GetAllDashboards()
@@ -190,22 +224,43 @@ namespace metabase_exporter
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/dashboard/" + dashboardId, UriKind.Relative));
             var response = await sessionManager.Send(request);
-            return JsonConvert.DeserializeObject<Dashboard>(response);
+            try
+            {
+                return JsonConvert.DeserializeObject<Dashboard>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Dashboard)} from:\n{response}", e);
+            }
         }
 
         public async Task<IReadOnlyList<DatabaseId>> GetAllDatabaseIds()
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/database", UriKind.Relative));
             var response = await sessionManager.Send(request);
-            var databases = JsonConvert.DeserializeObject<JArray>(response);
-            return databases.Select(d => new DatabaseId((int)d["id"])).ToList();
+            try
+            {
+                var databases = JsonConvert.DeserializeObject<JArray>(response);
+                return databases.Select(d => new DatabaseId((int) d["id"])).ToList();
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(DatabaseId)} array from:\n{response}", e);
+            }
         }
 
         public async Task<RunCardResult> RunCard(CardId card)
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/card/{card}/query", UriKind.Relative));
             var response = await sessionManager.Send(request);
-            return JsonConvert.DeserializeObject<RunCardResult>(response);
+            try
+            {
+                return JsonConvert.DeserializeObject<RunCardResult>(response);
+            }
+            catch (JsonSerializationException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(RunCardResult)} from:\n{response}", e);
+            }
         }
     }
 }
