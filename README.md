@@ -37,6 +37,8 @@ This exports the state to a file. Sample usage:
 
 `metabase-exporter.exe Command=export OutputFilename=metabase-state.json`
 
+You can optionally exclude personal collections by setting `ExcludePersonalCollections=1`
+
 ### Import
 
 This imports a state file into a Metabase instance. Sample usage:
