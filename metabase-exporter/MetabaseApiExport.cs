@@ -36,7 +36,10 @@ namespace metabase_exporter
             GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<CardId, CardId> cardMapping)
         {
             var dashboards = await api.GetAllDashboards();
-            var nonArchivedDashboards = dashboards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
+            var nonArchivedDashboards = dashboards
+                .Where(x => x.Archived == false)
+                .OrderBy(x => x.Id)
+                .ToArray();
             var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToList());
             foreach (var dashboard in nonArchivedDashboards)
             {
@@ -68,7 +71,10 @@ namespace metabase_exporter
             GetMappedCards(this MetabaseApi api, IReadOnlyDictionary<CollectionId, CollectionId> collectionMapping)
         {
             var cards = await api.GetAllCards();
-            var nonArchivedCards = cards.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
+            var nonArchivedCards = cards
+                .Where(x => x.Archived == false)
+                .OrderBy(x => x.Id)
+                .ToArray();
             var cardMapping = Renumber(nonArchivedCards.Select(x => x.Id).ToList());
             foreach (var card in nonArchivedCards)
             {
@@ -94,7 +100,10 @@ namespace metabase_exporter
             GetMappedCollections(this MetabaseApi api)
         {
             var collections = await api.GetAllCollections();
-            var nonArchivedCollections = collections.Where(x => x.Archived == false).OrderBy(x => x.Id).ToArray();
+            var nonArchivedCollections = collections
+                .Where(x => x.Archived == false)
+                .OrderBy(x => x.Id)
+                .ToArray();
             var collectionMapping = Renumber(nonArchivedCollections.Select(x => x.Id).ToList());
             foreach (var collection in nonArchivedCollections)
             {
