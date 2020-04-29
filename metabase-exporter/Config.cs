@@ -17,10 +17,12 @@ namespace metabase_exporter
         public sealed class Export: Config
         {
             public string OutputFilename { get; }
+            public bool ExcludePersonalCollections { get; }
 
-            public Export(MetabaseApiSettings MetabaseApiSettings, string outputFilename): base(MetabaseApiSettings)
+            public Export(MetabaseApiSettings metabaseApiSettings, string outputFilename, bool excludePersonalCollections) : base(metabaseApiSettings)
             {
                 OutputFilename = outputFilename;
+                ExcludePersonalCollections = excludePersonalCollections;
             }
 
             public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>

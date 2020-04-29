@@ -32,7 +32,7 @@ namespace metabase_exporter
 
         static async Task Export(this MetabaseApi api, Config.Export export)
         {
-            var state = await api.Export();
+            var state = await api.Export(export.ExcludePersonalCollections);
             var stateJson = JsonConvert.SerializeObject(state, Formatting.Indented);
             File.WriteAllText(path: export.OutputFilename, contents: stateJson);
             Console.WriteLine($"Exported current state for {export.MetabaseApiSettings.MetabaseApiUrl} to {export.OutputFilename}");
@@ -69,7 +69,10 @@ namespace metabase_exporter
                 {
                     throw new Exception("Mising OutputFilename config");
                 }
-                return new Config.Export(apiSettings, outputFilename);
+
+                var excludePersonalCollections = string.IsNullOrEmpty(rawConfig["ExcludePersonalCollections"]) == false;
+
+                return new Config.Export(apiSettings, outputFilename, excludePersonalCollections);
             }
             else if (StringComparer.InvariantCultureIgnoreCase.Equals(command, "test-questions"))
             {

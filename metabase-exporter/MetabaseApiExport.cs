@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace metabase_exporter
@@ -14,11 +15,9 @@ namespace metabase_exporter
         /// <summary>
         /// Export Metabase data
         /// </summary>
-        /// <param name="api"></param>
-        /// <returns></returns>
-        public static async Task<MetabaseState> Export(this MetabaseApi api)
+        public static async Task<MetabaseState> Export(this MetabaseApi api, bool excludePersonalCollections)
         {
-            var mappedCollections = await api.GetMappedCollections();
+            var mappedCollections = await api.GetMappedCollections(excludePersonalCollections);
             var mappedCards = await api.GetMappedCards(mappedCollections.CollectionMapping);
             var mappedDashboards = await api.GetMappedDashboards(mappedCards.CardMapping);
 
@@ -71,12 +70,13 @@ namespace metabase_exporter
             GetMappedCards(this MetabaseApi api, IReadOnlyDictionary<CollectionId, CollectionId> collectionMapping)
         {
             var cards = await api.GetAllCards();
-            var nonArchivedCards = cards
+            var cardsToExport = cards
                 .Where(x => x.Archived == false)
+                .Where(x => x.CollectionId == null || collectionMapping.ContainsKey(x.CollectionId.Value))
                 .OrderBy(x => x.Id)
                 .ToArray();
-            var cardMapping = Renumber(nonArchivedCards.Select(x => x.Id).ToList());
-            foreach (var card in nonArchivedCards)
+            var cardMapping = Renumber(cardsToExport.Select(x => x.Id).ToList());
+            foreach (var card in cardsToExport)
             {
                 var newId = cardMapping[card.Id];
                 var oldId = card.Id;
@@ -93,24 +93,29 @@ namespace metabase_exporter
                 card.Description = string.IsNullOrEmpty(card.Description) ? null : card.Description;
             }
 
-            return (nonArchivedCards, cardMapping);
+            return (cardsToExport, cardMapping);
         }
 
         static async Task<(IReadOnlyCollection<Collection> Collections, IReadOnlyDictionary<CollectionId, CollectionId> CollectionMapping)> 
-            GetMappedCollections(this MetabaseApi api)
+            GetMappedCollections(this MetabaseApi api, bool excludePersonalCollections)
         {
             var collections = await api.GetAllCollections();
-            var nonArchivedCollections = collections
+            var collectionsToExport = collections
                 .Where(x => x.Archived == false)
+                .Where(x => excludePersonalCollections == false || x.IsPersonal() == false)
                 .OrderBy(x => x.Id)
                 .ToArray();
-            var collectionMapping = Renumber(nonArchivedCollections.Select(x => x.Id).ToList());
-            foreach (var collection in nonArchivedCollections)
+            var collectionMapping = Renumber(collectionsToExport.Select(x => x.Id).ToList());
+            foreach (var collection in collectionsToExport)
             {
                 collection.Id = collectionMapping[collection.Id];
             }
-            return (nonArchivedCollections, collectionMapping);
+            return (collectionsToExport, collectionMapping);
         }
+
+        [Pure]
+        static bool IsPersonal(this Collection collection) =>
+            Regex.IsMatch(collection.Name, "personal collection", RegexOptions.IgnoreCase);
 
         [Pure]
         static IReadOnlyDictionary<T, T> Renumber<T>(IReadOnlyCollection<T> ids) where T: INewTypeComp<T, int>, new() =>
