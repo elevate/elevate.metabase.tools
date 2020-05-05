@@ -85,7 +85,7 @@ namespace metabase_exporter
         [JsonProperty("collection")]
         public string Collection { get; set; } // no idea what this is for. it's not a reference to the containing collection
 
-        [JsonProperty("template_tags")]
+        [JsonProperty("template-tags")]
         public IDictionary<string, TemplateTag> TemplateTags { get; set; }
     }
 
@@ -100,7 +100,7 @@ namespace metabase_exporter
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("display_name")]
+        [JsonProperty("display-name")]
         public string DisplayName { get; set; }
 
         [JsonProperty("type")]
