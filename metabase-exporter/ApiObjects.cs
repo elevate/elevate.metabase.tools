@@ -20,7 +20,7 @@ namespace metabase_exporter
         public bool Archived { get; set; }
 
         [JsonProperty("result_metadata")]
-        public JObject[] ResultMetadata { get; set; }
+        public ResultMetadata[] ResultMetadata { get; set; }
 
         [JsonProperty("metadata_checksum")]
         public string MetadataChecksum => GeneralExtensions.MD5Base64(JsonConvert.SerializeObject(ResultMetadata));
