@@ -149,9 +149,12 @@ namespace metabase_exporter
                 throw new Exception("Missing MetabaseApi:Password config");
             }
 
+            bool.TryParse(metabaseApiSection["IgnoreSSLErrors"], out var ignoreSSLErrors);
+
             return new MetabaseApiSettings(ParseUri(),
                 metabaseApiUsername: username.Trim(),
-                metabaseApiPassword: password.Trim());
+                metabaseApiPassword: password.Trim(),
+                ignoreSslErrors: ignoreSSLErrors);
         }
 
         static async Task<MetabaseApi> InitApi(MetabaseApiSettings apiSettings)

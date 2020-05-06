@@ -29,9 +29,12 @@ namespace metabase_exporter
         public MetabaseSessionTokenManager(MetabaseApiSettings settings, string initialToken)
         {
             this._settings = settings;
-            var handler = new HttpClientHandler {
-                ServerCertificateCustomValidationCallback = (a,b,c,d) => true,
-            };
+            var handler = settings.IgnoreSSLErrors
+                ? new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (a, b, c, d) => true,
+                }
+                : new HttpClientHandler();
             this._http = new HttpClient(handler)
             {
                 BaseAddress = settings.MetabaseApiUrl,
