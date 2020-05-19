@@ -172,7 +172,7 @@ namespace metabase_exporter
                 .Select(collectionFromState =>
                     new Mapping<Collection>(
                         source: collectionFromState,
-                        target: nonArchivedExistingCollections.Where(x => x.Name == collectionFromState.Name).FirstOrDefault()
+                        target: nonArchivedExistingCollections.FirstOrDefault(x => x.Name == collectionFromState.Name)
                     )
                 )
                 .Where(x => x.Target != null)
