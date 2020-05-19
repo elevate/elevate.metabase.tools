@@ -56,7 +56,7 @@ namespace metabase_exporter
                 var inputFilename = rawConfig["InputFilename"];
                 if (string.IsNullOrEmpty(inputFilename))
                 {
-                    throw new Exception("Mising InputFilename config");
+                    throw new Exception("Missing InputFilename config");
                 }
                 var databaseMapping = ParseDatabaseMapping(rawConfig);
                 return new Config.Import(apiSettings, inputFilename, databaseMapping);
@@ -67,7 +67,7 @@ namespace metabase_exporter
                 var outputFilename = rawConfig["OutputFilename"];
                 if (string.IsNullOrEmpty(outputFilename))
                 {
-                    throw new Exception("Mising OutputFilename config");
+                    throw new Exception("Missing OutputFilename config");
                 }
 
                 var excludePersonalCollections = string.IsNullOrEmpty(rawConfig["ExcludePersonalCollections"]) == false;
