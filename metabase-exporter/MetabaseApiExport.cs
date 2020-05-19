@@ -19,7 +19,7 @@ namespace metabase_exporter
         {
             var mappedCollections = await api.GetMappedCollections(excludePersonalCollections);
             var mappedCards = await api.GetMappedCards(mappedCollections.CollectionMapping);
-            var mappedDashboards = await api.GetMappedDashboards(mappedCards.CardMapping);
+            var mappedDashboards = await api.GetMappedDashboards(mappedCards.CardMapping, mappedCollections.Collections);
 
             var state = new MetabaseState
             {
@@ -32,11 +32,12 @@ namespace metabase_exporter
         }
 
         static async Task<(IReadOnlyCollection<Dashboard> Dashboards, IReadOnlyDictionary<DashboardId, DashboardId> DashboardMapping)>
-            GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<CardId, CardId> cardMapping)
+            GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<CardId, CardId> cardMapping, IReadOnlyCollection<Collection> exportedCollections)
         {
             var dashboards = await api.GetAllDashboards();
             var nonArchivedDashboards = dashboards
                 .Where(x => x.Archived == false)
+                .Where(dashboard => dashboard.CollectionId.HasValue == false || exportedCollections.Any(collection => collection.Id == dashboard.CollectionId))
                 .OrderBy(x => x.Id)
                 .ToArray();
             var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToList());
@@ -117,7 +118,7 @@ namespace metabase_exporter
         [Pure]
         static bool IsPersonal(this Collection collection) =>
             Regex.IsMatch(collection.Name, "personal collection", RegexOptions.IgnoreCase);
-
+        
         [Pure]
         static IReadOnlyDictionary<T, T> Renumber<T>(IReadOnlyCollection<T> ids) where T: INewTypeComp<T, int>, new() =>
             ids.OrderBy(x => x)

@@ -145,6 +145,9 @@ namespace metabase_exporter
         [JsonProperty("archived")]
         public bool Archived { get; set; }
 
+        [JsonProperty("collection_id")]
+        public CollectionId? CollectionId { get; set; }
+
         [JsonProperty("description")]
         public string Description { get; set; }
 
