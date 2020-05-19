@@ -200,8 +200,8 @@ namespace metabase_exporter
             }
 
             cardFromState.Description = string.IsNullOrEmpty(cardFromState.Description) ? null : cardFromState.Description;
-            cardFromState.DatabaseId = databaseMapping[cardFromState.DatabaseId];
-            cardFromState.DatasetQuery.DatabaseId = databaseMapping[cardFromState.DatasetQuery.DatabaseId];
+            cardFromState.DatabaseId = databaseMapping.GetOrThrow(cardFromState.DatabaseId, $"Database not found in database mapping for card {cardFromState.Id}");
+            cardFromState.DatasetQuery.DatabaseId = databaseMapping.GetOrThrow(cardFromState.DatasetQuery.DatabaseId, $"Database not found in database mapping for dataset query in card {cardFromState.Id}");
             await api.CreateCard(cardFromState);
             return cardFromState;
         }

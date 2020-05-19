@@ -42,23 +42,24 @@ namespace metabase_exporter
             var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToList());
             foreach (var dashboard in nonArchivedDashboards)
             {
-                dashboard.Id = dashboardMapping[dashboard.Id];
+                var oldDashboardId = dashboard.Id;
+                dashboard.Id = dashboardMapping.GetOrThrow(dashboard.Id, "Dashboard not found in mapping");
                 var dashboardCardMapping = Renumber(dashboard.Cards.Select(x => x.Id).ToList());
                 foreach (var card in dashboard.Cards.OrderBy(x => x.Id))
                 {
-                    card.Id = dashboardCardMapping[card.Id];
+                    card.Id = dashboardCardMapping.GetOrThrow(card.Id, $"Card not found in dashboard card mapping for dashboard {oldDashboardId}");
                     if (card.CardId.HasValue)
                     {
-                        card.CardId = cardMapping[card.CardId.Value];
+                        card.CardId = cardMapping.GetOrThrow(card.CardId.Value, $"Card not found in card mapping for dashboard {oldDashboardId}");
                     }
                     foreach (var parameter in card.ParameterMappings)
                     {
-                        parameter.CardId = cardMapping[parameter.CardId];
+                        parameter.CardId = cardMapping.GetOrThrow(parameter.CardId, $"Card not found in card mapping for parameter {parameter.ParameterId}, dashboard {oldDashboardId}");
                     }
 
                     foreach (var seriesCard in card.Series)
                     {
-                        seriesCard.Id = cardMapping[seriesCard.Id];
+                        seriesCard.Id = cardMapping.GetOrThrow(seriesCard.Id, $"Card not found in card mapping for series {seriesCard.Name}, dashboard {oldDashboardId}");
                     }
                 }
             }
@@ -78,13 +79,13 @@ namespace metabase_exporter
             var cardMapping = Renumber(cardsToExport.Select(x => x.Id).ToList());
             foreach (var card in cardsToExport)
             {
-                var newId = cardMapping[card.Id];
+                var newId = cardMapping.GetOrThrow(card.Id, "Card not found in card mapping");
                 var oldId = card.Id;
                 Console.WriteLine($"Mapping card {oldId} to {newId} ({card.Name})");
                 card.Id = newId;
                 if (card.CollectionId.HasValue)
                 {
-                    card.CollectionId = collectionMapping[card.CollectionId.Value];
+                    card.CollectionId = collectionMapping.GetOrThrow(card.CollectionId.Value, $"Collection not found in collection mapping for card {card.Id}");
                 }
                 if (card.DatasetQuery.Native == null)
                 {
@@ -108,7 +109,7 @@ namespace metabase_exporter
             var collectionMapping = Renumber(collectionsToExport.Select(x => x.Id).ToList());
             foreach (var collection in collectionsToExport)
             {
-                collection.Id = collectionMapping[collection.Id];
+                collection.Id = collectionMapping.GetOrThrow(collection.Id, "Collection not found in collection mapping");
             }
             return (collectionsToExport, collectionMapping);
         }

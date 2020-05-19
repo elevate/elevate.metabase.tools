@@ -46,5 +46,14 @@ namespace metabase_exporter
             }            
         }
 
+        public static TValue GetOrThrow<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dict, TKey key, string error)
+        {
+            if (dict.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+            throw new KeyNotFoundException($"Key not found: {key}\n{error}");
+        }
+
     }
 }
