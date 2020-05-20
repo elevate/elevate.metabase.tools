@@ -51,7 +51,7 @@ namespace metabase_exporter
             Console.WriteLine("Creating dashboards...");
             foreach (var dashboard in state.Dashboards)
             {
-                await api.MapAndCreateDashboard(dashboard, cardMapping);
+                await api.MapAndCreateDashboard(dashboard, cardMapping, collectionMapping);
             }
             Console.WriteLine("Done importing");
         }
@@ -102,9 +102,17 @@ namespace metabase_exporter
             }
         }
 
-        static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard, IReadOnlyList<Mapping<CardId>> cardMapping)
+        static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard,
+            IReadOnlyList<Mapping<CardId>> cardMapping, IReadOnlyList<Mapping<Collection>> collectionMapping)
         {
             var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToList();
+            if (stateDashboard.CollectionId.HasValue)
+            {
+                stateDashboard.CollectionId = collectionMapping
+                    .Where(x => x.Source.Id == stateDashboard.CollectionId.Value)
+                    .Select(x => x.Target.Id)
+                    .First();
+            }
             Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
             await api.CreateDashboard(stateDashboard);
             await api.AddCardsToDashboard(stateDashboard.Id, mappedCards);
