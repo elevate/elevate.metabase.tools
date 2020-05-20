@@ -39,6 +39,17 @@ namespace metabase_exporter
             {
                 BaseAddress = settings.MetabaseApiUrl,
             };
+            if (settings.MetabaseApiTimeout.HasValue)
+            {
+                try
+                {
+                    this._http.Timeout = settings.MetabaseApiTimeout.Value;
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Error setting API timeout to value " + settings.MetabaseApiTimeout.Value, e);
+                }
+            }
             if (string.IsNullOrEmpty(initialToken) == false)
             {
                 sessionToken = new AsyncLazy<string>(() => Task.FromResult(initialToken));

@@ -151,10 +151,20 @@ namespace metabase_exporter
 
             bool.TryParse(metabaseApiSection["IgnoreSSLErrors"], out var ignoreSSLErrors);
 
+            var timeout = TryParseTimeout(metabaseApiSection["Timeout"]);
+
             return new MetabaseApiSettings(ParseUri(),
                 metabaseApiUsername: username.Trim(),
                 metabaseApiPassword: password.Trim(),
-                ignoreSslErrors: ignoreSSLErrors);
+                ignoreSslErrors: ignoreSSLErrors,
+                metabaseApiTimeout: timeout);
+        }
+
+        static TimeSpan? TryParseTimeout(string input)
+        {
+            if (TimeSpan.TryParse(input, out var timeout))
+                return timeout;
+            return null;
         }
 
         static async Task<MetabaseApi> InitApi(MetabaseApiSettings apiSettings)
