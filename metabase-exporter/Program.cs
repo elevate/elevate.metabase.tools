@@ -176,7 +176,7 @@ namespace metabase_exporter
                 {
                     return File.ReadAllText(filename);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return null;
                 }
