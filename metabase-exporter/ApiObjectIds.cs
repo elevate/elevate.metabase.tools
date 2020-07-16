@@ -21,6 +21,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is CardId other ? Equals(other) : false;
+
         public static bool operator >(CardId a, CardId b) => a.CompareTo(b) > 0;
         public static bool operator <(CardId a, CardId b) => a.CompareTo(b) < 0;
         public static bool operator <=(CardId a, CardId b) => a.CompareTo(b) <= 0;
@@ -45,6 +47,8 @@ namespace metabase_exporter
 
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
+
+        public override bool Equals(object obj) => obj is CollectionId other ? Equals(other) : false;
 
         public static bool operator >(CollectionId a, CollectionId b) => a.CompareTo(b) > 0;
         public static bool operator <(CollectionId a, CollectionId b) => a.CompareTo(b) < 0;
@@ -72,6 +76,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is DashboardId other ? Equals(other) : false;
+
         public static bool operator >(DashboardId a, DashboardId b) => a.CompareTo(b) > 0;
         public static bool operator <(DashboardId a, DashboardId b) => a.CompareTo(b) < 0;
         public static bool operator <=(DashboardId a, DashboardId b) => a.CompareTo(b) <= 0;
@@ -98,6 +104,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is DashboardCardId other ? Equals(other) : false;
+
         public static bool operator >(DashboardCardId a, DashboardCardId b) => a.CompareTo(b) > 0;
         public static bool operator <(DashboardCardId a, DashboardCardId b) => a.CompareTo(b) < 0;
         public static bool operator <=(DashboardCardId a, DashboardCardId b) => a.CompareTo(b) <= 0;
@@ -123,6 +131,8 @@ namespace metabase_exporter
 
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
+
+        public override bool Equals(object obj) => obj is DatabaseId other ? Equals(other) : false;
 
         public static bool operator >(DatabaseId a, DatabaseId b) => a.CompareTo(b) > 0;
         public static bool operator <(DatabaseId a, DatabaseId b) => a.CompareTo(b) < 0;
