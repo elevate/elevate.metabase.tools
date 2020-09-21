@@ -8,5 +8,6 @@ mkShell {
         dotnetCorePackages.sdk_2_1
         dotnetCorePackages.sdk_3_1 
       ])
+      docker-compose
     ];
 }
