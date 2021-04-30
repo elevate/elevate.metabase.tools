@@ -1,13 +1,10 @@
 with (import (builtins.fetchTarball {
-  url = "https://github.com/NixOS/nixpkgs/archive/0538dec989ed6556bdce0e8fe59e4f2ef184915f.tar.gz";
-  sha256 = "048fvyw4hdhsmjiwsbv3wijbzfrgdi5zjizkal3gm8ib79p5zxsz";
+  url = "https://github.com/NixOS/nixpkgs/archive/ff13163e3fd5283d997d11fac04061f243d93f7c.tar.gz";
+  sha256 = "0d1pn4r8mlyz6mndik6dw4m6h12nv04vkv79r0zkcaqgab5x9170";
 })){};
 mkShell {
     buildInputs = [ 
-      (dotnetCorePackages.combinePackages [ 
-        dotnetCorePackages.sdk_2_1
-        dotnetCorePackages.sdk_3_1 
-      ])
+      dotnet-sdk_5
       docker-compose
     ];
 }
