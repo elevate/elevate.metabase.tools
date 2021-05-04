@@ -9,14 +9,10 @@ using System.Threading.Tasks;
 
 namespace metabase_exporter
 {
-    public class MetabaseApi
+    public record MetabaseApi(
+        MetabaseSessionTokenManager sessionManager
+    )
     {
-        readonly MetabaseSessionTokenManager sessionManager;
-
-        public MetabaseApi(MetabaseSessionTokenManager sessionManager)
-        {
-            this.sessionManager = sessionManager;
-        }
 
         public async Task CreateCard(Card card)
         {
