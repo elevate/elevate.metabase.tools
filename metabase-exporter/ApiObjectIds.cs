@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace metabase_exporter
 {
     [JsonConverter(typeof(IdJsonConverter<CardId>))]
-    public struct CardId : INewTypeComp<CardId, int>
+    public readonly struct CardId : INewTypeComp<CardId, int>
     {
         public int Value { get; }
 
@@ -32,7 +32,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<CollectionId>))]
-    public struct CollectionId: INewTypeComp<CollectionId, int>
+    public readonly struct CollectionId: INewTypeComp<CollectionId, int>
     {
         public int Value { get; }
 
@@ -60,7 +60,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DashboardId>))]
-    public struct DashboardId: INewTypeComp<DashboardId, int>
+    public readonly struct DashboardId: INewTypeComp<DashboardId, int>
     {
         public int Value { get; }
 
@@ -88,7 +88,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DashboardCardId>))]
-    public struct DashboardCardId: INewTypeComp<DashboardCardId, int>
+    public readonly struct DashboardCardId: INewTypeComp<DashboardCardId, int>
     {
         public int Value { get; }
 
@@ -116,7 +116,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DatabaseId>))]
-    public struct DatabaseId : INewTypeComp<DatabaseId, int>
+    public readonly struct DatabaseId : INewTypeComp<DatabaseId, int>
     {
         public int Value { get; }
 
