@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace metabase_exporter
 {
     [JsonConverter(typeof(IdJsonConverter<CardId>))]
-    public struct CardId : INewTypeComp<CardId, int>
+    public readonly struct CardId : INewTypeComp<CardId, int>
     {
         public int Value { get; }
 
@@ -21,6 +21,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is CardId other ? Equals(other) : false;
+
         public static bool operator >(CardId a, CardId b) => a.CompareTo(b) > 0;
         public static bool operator <(CardId a, CardId b) => a.CompareTo(b) < 0;
         public static bool operator <=(CardId a, CardId b) => a.CompareTo(b) <= 0;
@@ -30,7 +32,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<CollectionId>))]
-    public struct CollectionId: INewTypeComp<CollectionId, int>
+    public readonly struct CollectionId: INewTypeComp<CollectionId, int>
     {
         public int Value { get; }
 
@@ -46,6 +48,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is CollectionId other ? Equals(other) : false;
+
         public static bool operator >(CollectionId a, CollectionId b) => a.CompareTo(b) > 0;
         public static bool operator <(CollectionId a, CollectionId b) => a.CompareTo(b) < 0;
         public static bool operator <=(CollectionId a, CollectionId b) => a.CompareTo(b) <= 0;
@@ -56,7 +60,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DashboardId>))]
-    public struct DashboardId: INewTypeComp<DashboardId, int>
+    public readonly struct DashboardId: INewTypeComp<DashboardId, int>
     {
         public int Value { get; }
 
@@ -72,6 +76,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is DashboardId other ? Equals(other) : false;
+
         public static bool operator >(DashboardId a, DashboardId b) => a.CompareTo(b) > 0;
         public static bool operator <(DashboardId a, DashboardId b) => a.CompareTo(b) < 0;
         public static bool operator <=(DashboardId a, DashboardId b) => a.CompareTo(b) <= 0;
@@ -82,7 +88,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DashboardCardId>))]
-    public struct DashboardCardId: INewTypeComp<DashboardCardId, int>
+    public readonly struct DashboardCardId: INewTypeComp<DashboardCardId, int>
     {
         public int Value { get; }
 
@@ -98,6 +104,8 @@ namespace metabase_exporter
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
 
+        public override bool Equals(object obj) => obj is DashboardCardId other ? Equals(other) : false;
+
         public static bool operator >(DashboardCardId a, DashboardCardId b) => a.CompareTo(b) > 0;
         public static bool operator <(DashboardCardId a, DashboardCardId b) => a.CompareTo(b) < 0;
         public static bool operator <=(DashboardCardId a, DashboardCardId b) => a.CompareTo(b) <= 0;
@@ -108,7 +116,7 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DatabaseId>))]
-    public struct DatabaseId : INewTypeComp<DatabaseId, int>
+    public readonly struct DatabaseId : INewTypeComp<DatabaseId, int>
     {
         public int Value { get; }
 
@@ -123,6 +131,8 @@ namespace metabase_exporter
 
         public override int GetHashCode() => Value.GetHashCode();
         public override string ToString() => Value.ToString();
+
+        public override bool Equals(object obj) => obj is DatabaseId other ? Equals(other) : false;
 
         public static bool operator >(DatabaseId a, DatabaseId b) => a.CompareTo(b) > 0;
         public static bool operator <(DatabaseId a, DatabaseId b) => a.CompareTo(b) < 0;

@@ -154,10 +154,10 @@ namespace metabase_exporter
             var timeout = TryParseTimeout(metabaseApiSection["Timeout"]);
 
             return new MetabaseApiSettings(ParseUri(),
-                metabaseApiUsername: username.Trim(),
-                metabaseApiPassword: password.Trim(),
-                ignoreSslErrors: ignoreSSLErrors,
-                metabaseApiTimeout: timeout);
+                MetabaseApiUsername: username.Trim(),
+                MetabaseApiPassword: password.Trim(),
+                IgnoreSSLErrors: ignoreSSLErrors,
+                MetabaseApiTimeout: timeout);
         }
 
         static TimeSpan? TryParseTimeout(string input)
@@ -176,7 +176,7 @@ namespace metabase_exporter
                 {
                     return File.ReadAllText(filename);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return null;
                 }

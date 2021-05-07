@@ -1,0 +1,68 @@
+version: "3.3"
+services:
+  postgres:
+    image: postgres:10-alpine
+    environment:
+    - POSTGRES_USER=metabase
+    - POSTGRES_PASSWORD=metabase
+    - POSTGRES_DB=metabase
+
+  metabase:
+    image: metabase/metabase:v0.39.1
+    depends_on:
+    - postgres
+    environment:
+    - MB_DB_TYPE=postgres
+    - MB_DB_HOST=postgres
+    - MB_DB_USER=metabase
+    - MB_DB_PASS=metabase
+
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+    - postgres
+    - metabase 
+    environment:
+    - TIMEOUT_LENGTH=60
+    command: postgres:5432 metabase:3000
+
+  add_user:
+    image: postgres:10-alpine
+    # password : BhaptWyFKeH9Fd
+    command: >
+      psql -c "INSERT INTO public.core_user
+      (email, first_name, last_name, password, password_salt, date_joined, last_login, is_superuser, is_active, reset_token, reset_triggered, is_qbnewb, google_auth, ldap_auth, login_attributes, updated_at)
+      VALUES
+      ('mauricioscheffer@gmail.com', 'Mauricio', 'Scheffer', '$$2a$$10$$6CJtjMWiXFvOVBPCwXKS/u5ug/i61EkYIP8UreRty/7xxo9nIfREW', '34a3ecd8-7a89-4aa7-8589-b8d2417e0a61', NOW(), NOW(), true, true, NULL, 0, true, false, false, NULL, NOW());"
+    depends_on:
+    - postgres
+    - metabase 
+    environment:
+    - PGUSER=metabase
+    - PGPASSWORD=metabase
+    - PGHOST=postgres
+
+  test_export:
+    build: .
+    command: Command=export OutputFilename=/data/test.json
+    depends_on:
+    - metabase 
+    volumes:
+    - type: volume
+      source: data
+      target: /data
+
+  test_import:
+    build: .
+    command: Command=import InputFilename=/data/test.json
+    depends_on:
+    - metabase 
+    volumes:
+    - type: volume
+      source: data
+      target: /data
+
+
+volumes:
+  data:
+

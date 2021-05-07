@@ -1,14 +1,10 @@
-let pkgsMaster = (import (builtins.fetchTarball {
-  url = "https://github.com/NixOS/nixpkgs/archive/0538dec989ed6556bdce0e8fe59e4f2ef184915f.tar.gz";
-  sha256 = "1v2j9k5m35gnih2mqxkvpa6zl3v6q9bj4214nq0xj7r2c25hqi19";
+with (import (builtins.fetchTarball {
+  url = "https://github.com/NixOS/nixpkgs/archive/ff13163e3fd5283d997d11fac04061f243d93f7c.tar.gz";
+  sha256 = "0d1pn4r8mlyz6mndik6dw4m6h12nv04vkv79r0zkcaqgab5x9170";
 })){};
-in
-{ pkgs ? import <nixpkgs> {} }:
-pkgs.mkShell {
+mkShell {
     buildInputs = [ 
-      (pkgsMaster.dotnetCorePackages.combinePackages [ 
-        pkgsMaster.dotnetCorePackages.sdk_2_1
-        pkgsMaster.dotnetCorePackages.sdk_3_1 
-      ])
+      dotnet-sdk_5
+      docker-compose
     ];
 }

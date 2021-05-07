@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace metabase_exporter
 {
-    public abstract class Config
+    public abstract record Config
     {
         private Config(MetabaseApiSettings metabaseApiSettings)
         {
@@ -14,7 +14,7 @@ namespace metabase_exporter
 
         public abstract T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions);
 
-        public sealed class Export: Config
+        public sealed record Export: Config
         {
             public string OutputFilename { get; }
             public bool ExcludePersonalCollections { get; }
@@ -29,7 +29,7 @@ namespace metabase_exporter
                 export(this);
         }
 
-        public sealed class Import: Config
+        public sealed record Import: Config
         {
             public string InputFilename { get; }
             public IReadOnlyDictionary<DatabaseId, DatabaseId> DatabaseMapping { get; }
@@ -44,7 +44,7 @@ namespace metabase_exporter
                 import(this);
         }
         
-        public sealed class TestQuestions: Config
+        public sealed record TestQuestions: Config
         {
             public TestQuestions(MetabaseApiSettings metabaseApiSettings) : base(metabaseApiSettings){}
 
