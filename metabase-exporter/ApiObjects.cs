@@ -111,6 +111,22 @@ namespace metabase_exporter
 
         [JsonProperty("default")]
         public string Default { get; set; }
+
+        public bool ShouldSerializeDimension()
+        {
+            return (this.Type == "dimension"); // only serialize dimension if Type is "dimension"
+        }
+
+        [JsonProperty("dimension")]
+        public JArray Dimension { get; set; }
+
+        public bool ShouldSerializeWidgetType()
+        {
+            return (this.Type == "dimension"); // only serialize widget-type if Type is "dimension"
+        }
+
+        [JsonProperty("widget-type")]
+        public string WidgetType { get; set; }
     }
 
     public class Collection
