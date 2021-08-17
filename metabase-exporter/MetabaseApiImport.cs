@@ -35,10 +35,11 @@ namespace metabase_exporter
             await api.DeleteAllCards();
 
             Console.WriteLine("Creating cards...");
+            Database[] databases = await api.GetDatabases();
             var partialCardMapping = await state.Cards
                 .Traverse(async cardFromState => {
                     var source = cardFromState.Id;
-                    var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping);
+                    var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping, databases);
                     var mapping = new Mapping<CardId?>(source: source, target: target?.Id);
                     return mapping;
                 });
@@ -191,7 +192,7 @@ namespace metabase_exporter
             return collectionMapping;
         }
 
-        static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
+        static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, Database[] databases)
         {
             if (cardFromState.DatasetQuery.Native == null)
             {
@@ -210,8 +211,47 @@ namespace metabase_exporter
             cardFromState.Description = string.IsNullOrEmpty(cardFromState.Description) ? null : cardFromState.Description;
             cardFromState.DatabaseId = databaseMapping.GetOrThrow(cardFromState.DatabaseId, $"Database not found in database mapping for card {cardFromState.Id}");
             cardFromState.DatasetQuery.DatabaseId = databaseMapping.GetOrThrow(cardFromState.DatasetQuery.DatabaseId, $"Database not found in database mapping for dataset query in card {cardFromState.Id}");
+            foreach (KeyValuePair<string, TemplateTag> templateTag in cardFromState.DatasetQuery.Native.TemplateTags)
+            {
+                if (templateTag.Value.Type == "dimension")
+                {
+                    string fieldIdentifier = (string)templateTag.Value.Dimension[1];
+                    string[] fieldIdentifierParts = fieldIdentifier.Split('.');
+                    foreach (Database database in databases)
+                    {
+                        if (database.Name == fieldIdentifierParts[0])
+                        {
+                            int fieldId = await api.FindFieldIdInDatabase(database, fieldIdentifierParts[1], fieldIdentifierParts[2], fieldIdentifierParts[3]);
+                            if (fieldId == -1)
+                            {
+                                Console.WriteLine($"WARNING: No field found for {fieldIdentifier}");
+                            }
+                            cardFromState.DatasetQuery.Native.TemplateTags[templateTag.Key].Dimension[1] = fieldId;
+                        }
+                    }
+                }
+            }
+
             await api.CreateCard(cardFromState);
             return cardFromState;
+        }
+
+        static async Task<int> FindFieldIdInDatabase(this MetabaseApi api, Database database, string schemaName, string tableName, string fieldName)
+        {
+            foreach (Table table in database.Tables)
+            {
+                if (table.Schema == schemaName && table.Name == tableName)
+                {
+                    TableWithFields tableWithFields = await api.GetTableFields(table.Id);
+                    foreach (FieldWithNameAndId field in tableWithFields.Fields)
+                    {
+                        if (field.Name == fieldName) {
+                            return field.Id;
+                        }
+                    }
+                }
+            }
+            return -1;
         }
 
         class Mapping<T>

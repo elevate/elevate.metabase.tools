@@ -300,4 +300,58 @@ namespace metabase_exporter
         [JsonProperty("error")]
         public string Error { get; set; }
     }
+
+    public class Field
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("table")]
+        public Table Table { get; set; }
+    }
+
+    public class Table
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("schema")]
+        public string Schema { get; set; }
+
+        [JsonProperty("db")]
+        public Db Db { get; set; }
+    }
+
+    public class Db
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+    }
+
+    public class Database
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("tables")]
+        public Table[] Tables { get; set; }
+    }
+
+    public class TableWithFields
+    {
+        [JsonProperty("fields")]
+        public FieldWithNameAndId[] Fields { get; set; }
+    }
+
+    public class FieldWithNameAndId
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("id")]
+        public int Id { get; set; }
+    }
 }

@@ -192,6 +192,27 @@ namespace metabase_exporter
             return JsonConvert.DeserializeObject<Card[]>(response);
         }
 
+        public async Task<Field> GetField(JToken fieldId)
+        {
+            HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri($"/api/field/{fieldId}", UriKind.Relative));
+            var response = await sessionManager.Send(request);
+            return JsonConvert.DeserializeObject<Field>(response);
+        }
+
+        public async Task<Database[]> GetDatabases()
+        {
+            HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/database?include=tables", UriKind.Relative));
+            var response = await sessionManager.Send(request);
+            return JsonConvert.DeserializeObject<Database[]>(response);
+        }
+
+        public async Task<TableWithFields> GetTableFields(int tableId)
+        {
+            HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri($"/api/table/{tableId}/query_metadata", UriKind.Relative));
+            var response = await sessionManager.Send(request);
+            return JsonConvert.DeserializeObject<TableWithFields>(response);
+        }
+
         public async Task<IReadOnlyList<Collection>> GetAllCollections()
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/collection", UriKind.Relative));
