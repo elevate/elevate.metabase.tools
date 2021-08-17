@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -213,7 +215,7 @@ namespace metabase_exporter
             cardFromState.DatasetQuery.DatabaseId = databaseMapping.GetOrThrow(cardFromState.DatasetQuery.DatabaseId, $"Database not found in database mapping for dataset query in card {cardFromState.Id}");
             foreach (KeyValuePair<string, TemplateTag> templateTag in cardFromState.DatasetQuery.Native.TemplateTags)
             {
-                if (templateTag.Value.Type == "dimension")
+                if (templateTag.Value.Type == "dimension" &&  templateTag.Value.Dimension[1].Type != JTokenType.Integer)
                 {
                     string fieldIdentifier = (string)templateTag.Value.Dimension[1];
                     string[] fieldIdentifierParts = fieldIdentifier.Split('.');
@@ -242,6 +244,7 @@ namespace metabase_exporter
             {
                 if (table.Schema == schemaName && table.Name == tableName)
                 {
+                    // The tables you get with the database metadata don't include the fields, so you have to make a separate call to get those 
                     TableWithFields tableWithFields = await api.GetTableFields(table.Id);
                     foreach (FieldWithNameAndId field in tableWithFields.Fields)
                     {
