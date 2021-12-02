@@ -93,6 +93,16 @@ namespace metabase_exporter
                     Console.WriteLine($"WARNING: card {oldId} has a non-SQL definition. Its state might not be exported/imported correctly. ({card.Name})");
                 }
                 card.Description = string.IsNullOrEmpty(card.Description) ? null : card.Description;
+
+                foreach (KeyValuePair<string, TemplateTag> templateTag in card.DatasetQuery.Native.TemplateTags)
+                {
+                    if (templateTag.Value.Type == "dimension")
+                    {
+                        Field field = await api.GetField(templateTag.Value.Dimension[1]);
+                        string fieldIdentifier = $"{field.Table.Db.Name}.{field.Table.Schema}.{field.Table.Name}.{field.Name}";
+                        card.DatasetQuery.Native.TemplateTags[templateTag.Key].Dimension[1] = fieldIdentifier;
+                    }
+                }
             }
 
             return (cardsToExport, cardMapping);
