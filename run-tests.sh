@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/usr/bin/env nix-shell
+#! nix-shell -i sh
 set -e
 alias compose="docker-compose -f docker-compose-tests.yml"
 compose run --rm start_dependencies

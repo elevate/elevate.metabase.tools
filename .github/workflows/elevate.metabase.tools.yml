@@ -1,0 +1,14 @@
+name: elevate.metabase.tools
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cachix/install-nix-action@v15
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.3.16/install
+      - name: Build and test
+        run: ./run-tests.sh
