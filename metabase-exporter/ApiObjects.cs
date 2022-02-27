@@ -179,7 +179,8 @@ namespace metabase_exporter
         public string Type { get; set; }
 
         [JsonProperty("default")]
-        public string Default { get; set; }
+        [JsonConverter(typeof(CustomArrayConverter<string>))]
+        public string[] Default { get; set; }
     }
 
     /// <summary>
@@ -277,7 +278,7 @@ namespace metabase_exporter
         /// </summary>
         [JsonProperty("status")]
         public string Status { get; set; }
-        
+
         /// <summary>
         /// If <see cref="Status"/> == "failed"
         /// </summary>
