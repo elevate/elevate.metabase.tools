@@ -5,6 +5,5 @@ with (import (builtins.fetchTarball {
 mkShell {
     buildInputs = [ 
       dotnet-sdk_6
-      docker-compose
     ];
 }

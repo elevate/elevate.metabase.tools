@@ -10,9 +10,9 @@ using System.Diagnostics.Contracts;
 
 namespace metabase_exporter
 {
-    static class Program
+    public static class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
