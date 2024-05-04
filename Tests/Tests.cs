@@ -75,7 +75,7 @@ public static class Tests
         var privateIP = docker.Networks.InspectNetworkAsync("bridge").GetAwaiter().GetResult().IPAM.Config[0].Gateway;
         var connString = new NpgsqlConnectionStringBuilder(postgres.Value.GetConnectionString());
         var container = new ContainerBuilder()
-            .WithImage("metabase/metabase:v0.39.1")
+            .WithImage("metabase/metabase:v0.39.7")
             .WithPortBinding(metabasePort, assignRandomHostPort: true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Metabase Initialization COMPLETE"))
             .WithEnvironment(new Dictionary<string, string>
@@ -94,9 +94,9 @@ public static class Tests
         using var cmd = conn.CreateCommand();
         cmd.CommandText = @"
             INSERT INTO public.core_user
-            (email, first_name, last_name, password, password_salt, date_joined, last_login, is_superuser, is_active, reset_token, reset_triggered, ldap_auth, updated_at)
+            (email, first_name, last_name, password, password_salt, date_joined, last_login, is_superuser, is_active, reset_token, reset_triggered, updated_at)
             VALUES
-            (@user, 'Mauricio', 'Scheffer', '$2a$10$C6OAB3k6QgM6.0e8Jqo71udz14w2zMSVt4x.fdo9DmhnZkxs2yz4a', 'a4d9fe2a-fbd9-44c6-a1a1-de3bf8c3be86', NOW(), NOW(), true, true, NULL, 0, false, NOW());
+            (@user, 'Mauricio', 'Scheffer', '$2a$10$C6OAB3k6QgM6.0e8Jqo71udz14w2zMSVt4x.fdo9DmhnZkxs2yz4a', 'a4d9fe2a-fbd9-44c6-a1a1-de3bf8c3be86', NOW(), NOW(), true, true, NULL, 0, NOW());
 
             INSERT INTO public.permissions_group_membership (user_id, group_id) VALUES (1, 2);
         ";
