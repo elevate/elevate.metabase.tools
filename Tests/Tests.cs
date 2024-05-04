@@ -13,7 +13,7 @@ public static class Tests
 {
     
     [Fact]
-    public static async Task ExportThenImport()
+    public static async Task ImportTestExport()
     {
         //Environment.SetEnvironmentVariable("TESTCONTAINERS_RYUK_DISABLED", "true");
         var commonArgs = new Dictionary<string, string>
@@ -24,18 +24,29 @@ public static class Tests
             { "MetabaseApi:IgnoreSSLErrors", "true" }
         };
         
-        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
-        {
-            { "Command", "export"},
-            { "OutputFilename", "test.json"},
-        }).ToCommandline());
-
+        const string inputFilename = "metabase-state.json";
         await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
         {
             { "Command", "import"},
-            { "InputFilename", "test.json"},
+            { "InputFilename", inputFilename},
+            { "DatabaseMapping:1", "1"}
         }).ToCommandline());
         
+        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
+        {
+            { "Command", "test-questions"},
+        }).ToCommandline());
+        
+        const string outputFilename = "test.json";
+        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
+        {
+            { "Command", "export"},
+            { "OutputFilename", outputFilename},
+        }).ToCommandline());
+
+        var output = await File.ReadAllTextAsync(outputFilename);
+        var input = await File.ReadAllTextAsync(inputFilename);
+        Assert.Equal(input, output);
     }
 
     static string[] ToCommandline(this IDictionary<string, string> x) => 
@@ -86,6 +97,8 @@ public static class Tests
             (email, first_name, last_name, password, password_salt, date_joined, last_login, is_superuser, is_active, reset_token, reset_triggered, ldap_auth, updated_at)
             VALUES
             (@user, 'Mauricio', 'Scheffer', '$2a$10$C6OAB3k6QgM6.0e8Jqo71udz14w2zMSVt4x.fdo9DmhnZkxs2yz4a', 'a4d9fe2a-fbd9-44c6-a1a1-de3bf8c3be86', NOW(), NOW(), true, true, NULL, 0, false, NOW());
+
+            INSERT INTO public.permissions_group_membership (user_id, group_id) VALUES (1, 2);
         ";
         cmd.Parameters.Add(new NpgsqlParameter { ParameterName = "user", Value = user });
         

@@ -1,0 +1,139 @@
+{
+  "collections": [
+    {
+      "id": 1,
+      "name": "Our analytics",
+      "slug": null,
+      "description": null,
+      "color": null,
+      "archived": false
+    },
+    {
+      "id": 2,
+      "name": "Mauricio Scheffer's Personal Collection",
+      "slug": "mauricio_scheffer_s_personal_collection",
+      "description": null,
+      "color": "#31698A",
+      "archived": false
+    }
+  ],
+  "dashboards": [
+    {
+      "id": 1,
+      "name": "a dashboard",
+      "archived": false,
+      "collection_id": null,
+      "description": null,
+      "enable_embedding": false,
+      "embedding_params": null,
+      "parameters": [],
+      "ordered_cards": [
+        {
+          "id": 1,
+          "col": 0,
+          "row": 0,
+          "sizeX": 4,
+          "sizeY": 4,
+          "card_id": 1,
+          "parameter_mappings": [],
+          "visualization_settings": {},
+          "series": []
+        }
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": 1,
+      "description": null,
+      "archived": false,
+      "result_metadata": [
+        {
+          "name": "ID",
+          "base_type": "type/BigInteger",
+          "display_name": "ID"
+        },
+        {
+          "name": "ADDRESS",
+          "base_type": "type/Text",
+          "display_name": "ADDRESS"
+        },
+        {
+          "name": "EMAIL",
+          "base_type": "type/Text",
+          "display_name": "EMAIL"
+        },
+        {
+          "name": "PASSWORD",
+          "base_type": "type/Text",
+          "display_name": "PASSWORD"
+        },
+        {
+          "name": "NAME",
+          "base_type": "type/Text",
+          "display_name": "NAME"
+        },
+        {
+          "name": "CITY",
+          "base_type": "type/Text",
+          "display_name": "CITY"
+        },
+        {
+          "name": "LONGITUDE",
+          "base_type": "type/Float",
+          "display_name": "LONGITUDE"
+        },
+        {
+          "name": "STATE",
+          "base_type": "type/Text",
+          "display_name": "STATE"
+        },
+        {
+          "name": "SOURCE",
+          "base_type": "type/Text",
+          "display_name": "SOURCE"
+        },
+        {
+          "name": "BIRTH_DATE",
+          "base_type": "type/Date",
+          "display_name": "BIRTH_DATE"
+        },
+        {
+          "name": "ZIP",
+          "base_type": "type/Text",
+          "display_name": "ZIP"
+        },
+        {
+          "name": "LATITUDE",
+          "base_type": "type/Float",
+          "display_name": "LATITUDE"
+        },
+        {
+          "name": "CREATED_AT",
+          "base_type": "type/DateTime",
+          "display_name": "CREATED_AT"
+        }
+      ],
+      "metadata_checksum": "ODRE+hxxuG1g8OF9Oc7ogQ==",
+      "database_id": 1,
+      "enable_embedding": false,
+      "embedding_params": null,
+      "collection_id": null,
+      "name": "everyone",
+      "display": "table",
+      "dataset_query": {
+        "database": 1,
+        "type": "native",
+        "native": {
+          "query": "select *\nfrom PEOPLE",
+          "collection": null,
+          "template-tags": {}
+        }
+      },
+      "visualization_settings": {
+        "table.pivot_column": "SOURCE",
+        "table.cell_column": "ID"
+      }
+    }
+  ]
+}
