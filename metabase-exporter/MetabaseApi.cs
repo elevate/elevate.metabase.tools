@@ -236,7 +236,7 @@ namespace metabase_exporter
             var response = await sessionManager.Send(request);
             try
             {
-                var databases = JsonConvert.DeserializeObject<JArray>(response);
+                var databases = JsonConvert.DeserializeObject<JObject>(response)["data"];
                 return databases.Select(d => new DatabaseId((int) d["id"])).ToList();
             }
             catch (JsonSerializationException e)
