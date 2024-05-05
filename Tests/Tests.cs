@@ -75,7 +75,7 @@ public static class Tests
         var privateIP = docker.Networks.InspectNetworkAsync("bridge").GetAwaiter().GetResult().IPAM.Config[0].Gateway;
         var connString = new NpgsqlConnectionStringBuilder(postgres.Value.GetConnectionString());
         var container = new ContainerBuilder()
-            .WithImage("metabase/metabase:v0.43.7.3")
+            .WithImage("metabase/metabase:v0.44.7.3")
             .WithPortBinding(metabasePort, assignRandomHostPort: true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Metabase Initialization COMPLETE"))
             .WithEnvironment(new Dictionary<string, string>
