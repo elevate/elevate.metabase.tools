@@ -16,7 +16,7 @@ Other features (e.g. pulses) are not supported simply because I don't need them 
 
 ## Usage
 
-Parameters can be given via command-line, appsettings.json or environment variables.
+Parameters can be given via [command-line, appsettings.json or environment variables](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers).
 There are two modes of operation, given by the `Command` parameter: `import` or `export`.
 
 Regardless of the operation, the Metabase API settings must be configured. E.g. in appsettings.json:
