@@ -211,9 +211,15 @@ namespace metabase_exporter
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/dashboard", UriKind.Relative));
             var response = await sessionManager.Send(request);
-            var dashboards = JsonConvert.DeserializeObject<Dashboard[]>(response);
-            // the endpoint that returns all dashboards does not include all detail for each dashboard
-            return await dashboards.Traverse(async dashboard => await GetDashboard(dashboard.Id));
+            try {
+                var dashboards = JsonConvert.DeserializeObject<Dashboard[]>(response);
+                // the endpoint that returns all dashboards does not include all detail for each dashboard
+                return await dashboards.Traverse(async dashboard => await GetDashboard(dashboard.Id));
+            }
+            catch (JsonReaderException e)
+            {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Dashboard)} array from:\n{response}", e);
+            }
         }
 
         public async Task<Dashboard> GetDashboard(DashboardId dashboardId)
