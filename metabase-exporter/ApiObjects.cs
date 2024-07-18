@@ -179,7 +179,7 @@ namespace metabase_exporter
         public string Type { get; set; }
 
         [JsonProperty("default")]
-        public string Default { get; set; }
+        public JToken Default { get; set; }
     }
 
     /// <summary>
