@@ -110,7 +110,7 @@ namespace metabase_exporter
         public bool Required { get; set; }
 
         [JsonProperty("default")]
-        public string Default { get; set; }
+        public JToken Default { get; set; }
     }
 
     public class Collection
