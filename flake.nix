@@ -1,5 +1,5 @@
 {
-  description = "Description for the project";
+  description = "Export/Import Metabase questions/dashboard/collections";
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
