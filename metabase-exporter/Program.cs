@@ -42,7 +42,7 @@ namespace metabase_exporter
         {
             var rawState = File.ReadAllText(import.InputFilename);
             var state = JsonConvert.DeserializeObject<MetabaseState>(rawState);
-            await api.Import(state, import.DatabaseMapping);
+            await api.Import(state, import.DatabaseMapping, import.IgnoredDatabases);
             Console.WriteLine($"Done importing from {import.InputFilename} into {import.MetabaseApiSettings.MetabaseApiUrl}");
         }
 
@@ -58,8 +58,9 @@ namespace metabase_exporter
                 {
                     throw new Exception("Missing InputFilename config");
                 }
+                var ignoreDatabases = ParseIgnoreDatabases(rawConfig);
                 var databaseMapping = ParseDatabaseMapping(rawConfig);
-                return new Config.Import(apiSettings, inputFilename, databaseMapping);
+                return new Config.Import(apiSettings, inputFilename, databaseMapping, ignoreDatabases);
             }
             else if (StringComparer.InvariantCultureIgnoreCase.Equals(command, "export"))
             {
@@ -80,6 +81,23 @@ namespace metabase_exporter
                 return new Config.TestQuestions(apiSettings);
             }
             throw new Exception($"Invalid command '{command}', must be either 'import' or 'export' or 'test-questions'");
+        }
+
+        static IReadOnlyList<DatabaseId> ParseIgnoreDatabases(IConfiguration rawConfig)
+        {
+            return (rawConfig["IgnoreDatabases"] ?? "")
+                .Split(",")
+                .Select(x => {
+                    try
+                    {
+                        return new DatabaseId(int.Parse(x));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Invalid IgnoreDatabases value: '{x}'", e);
+                    }
+                })
+                .ToList();
         }
 
         static IReadOnlyDictionary<DatabaseId, DatabaseId> ParseDatabaseMapping(IConfiguration rawConfig)

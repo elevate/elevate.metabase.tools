@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,14 +15,10 @@ namespace metabase_exporter
         /// <summary>
         /// Imports Metabase data. DELETES all current dashboards/questions/etc.
         /// </summary>
-        /// <param name="api"></param>
-        /// <param name="state"></param>
-        /// <param name="databaseMapping"></param>
-        /// <returns></returns>
-        public static async Task Import(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
+        public static async Task Import(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases)
         {
             // firstly check that the database mapping is complete and correct
-            await api.ValidateDatabaseMapping(state, databaseMapping);
+            await api.ValidateDatabaseMapping(state, databaseMapping, ignoredDatabases);
 
             // now map/create collections then cards then dashboards
 
@@ -38,7 +35,7 @@ namespace metabase_exporter
             var partialCardMapping = await state.Cards
                 .Traverse(async cardFromState => {
                     var source = cardFromState.Id;
-                    var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping);
+                    var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping, ignoredDatabases);
                     var mapping = new Mapping<CardId?>(source: source, target: target?.Id);
                     return mapping;
                 });
@@ -56,10 +53,20 @@ namespace metabase_exporter
             Console.WriteLine("Done importing");
         }
 
-        static void ValidateSourceDatabaseMapping(MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
+        static void ValidateSourceDatabaseMapping(MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases)
         {
+            var definedIgnoredDatabases = databaseMapping.Keys.Intersect(ignoredDatabases).ToImmutableList();
+            if (definedIgnoredDatabases.Count > 0)
+            {
+                throw new Exception("Databases marked as ignored but also defined in mappings: " + string.Join(", ", definedIgnoredDatabases));
+            }
+            
             var allDatabaseIds = state.Cards.SelectMany(c => new[] { c.DatabaseId, c.DatasetQuery.DatabaseId });
-            var missingDatabaseIdsInMapping = allDatabaseIds.Where(x => databaseMapping.ContainsKey(x) == false).Distinct().ToList();
+            var missingDatabaseIdsInMapping = allDatabaseIds
+                .Where(x => databaseMapping.ContainsKey(x) == false)
+                .Distinct()
+                .Except(ignoredDatabases)
+                .ToList();
             if (missingDatabaseIdsInMapping.Count > 0)
             {
                 throw new Exception("Missing databases in mapping: " + string.Join(",", missingDatabaseIdsInMapping));
@@ -77,9 +84,9 @@ namespace metabase_exporter
             }
         }
 
-        static async Task ValidateDatabaseMapping(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
+        static async Task ValidateDatabaseMapping(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases)
         {
-            ValidateSourceDatabaseMapping(state, databaseMapping);
+            ValidateSourceDatabaseMapping(state, databaseMapping, ignoredDatabases);
             await api.ValidateTargetDatabaseMapping(databaseMapping);
         }
 
@@ -191,13 +198,20 @@ namespace metabase_exporter
             return collectionMapping;
         }
 
-        static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
+        static async Task<Card> MapAndCreateCard(this MetabaseApi api, Card cardFromState, IReadOnlyList<Mapping<Collection>> collectionMapping, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases)
         {
             if (cardFromState.DatasetQuery.Native == null)
             {
                 Console.WriteLine("WARNING: skipping card because it does not have a SQL definition: " + cardFromState.Name);
                 return null;
             }
+
+            if (ignoredDatabases.Contains(cardFromState.DatabaseId))
+            {
+                Console.WriteLine("WARNING: skipping card because database is marked as ignored: " + cardFromState.Name);
+                return null;
+            }
+            
             Console.WriteLine($"Creating card '{cardFromState.Name}'");
             if (cardFromState.CollectionId.HasValue)
             {

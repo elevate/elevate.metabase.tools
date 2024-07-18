@@ -33,11 +33,13 @@ namespace metabase_exporter
         {
             public string InputFilename { get; }
             public IReadOnlyDictionary<DatabaseId, DatabaseId> DatabaseMapping { get; }
+            public IReadOnlyList<DatabaseId> IgnoredDatabases { get; }
 
-            public Import(MetabaseApiSettings MetabaseApiSettings, string inputFilename, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping): base(MetabaseApiSettings)
+            public Import(MetabaseApiSettings MetabaseApiSettings, string inputFilename, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases): base(MetabaseApiSettings)
             {
                 InputFilename = inputFilename;
                 DatabaseMapping = databaseMapping;
+                IgnoredDatabases = ignoredDatabases;
             }
 
             public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
