@@ -189,7 +189,11 @@ namespace metabase_exporter
         {
             HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/card", UriKind.Relative));
             var response = await sessionManager.Send(request);
-            return JsonConvert.DeserializeObject<Card[]>(response);
+            try {
+                return JsonConvert.DeserializeObject<Card[]>(response);
+            } catch (JsonReaderException e) {
+                throw new MetabaseApiException($"Error parsing response for {nameof(Card)} from:\n{response}", e);
+            }
         }
 
         public async Task<IReadOnlyList<Collection>> GetAllCollections()
