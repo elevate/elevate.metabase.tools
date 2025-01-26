@@ -85,7 +85,12 @@ namespace metabase_exporter
 
         static IReadOnlyList<DatabaseId> ParseIgnoreDatabases(IConfiguration rawConfig)
         {
-            return (rawConfig["IgnoreDatabases"] ?? "")
+            var rawValue = rawConfig["IgnoreDatabases"];
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return [];
+            }
+            return rawValue
                 .Split(",")
                 .Select(x => {
                     try
