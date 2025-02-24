@@ -5,14 +5,9 @@ using System.Collections.Generic;
 namespace metabase_exporter
 {
     [JsonConverter(typeof(IdJsonConverter<CardId>))]
-    public readonly struct CardId : INewTypeComp<CardId, int>
+    public readonly struct CardId(int value) : INewTypeComp<CardId, int>
     {
-        public int Value { get; }
-
-        public CardId(int value)
-        {
-            Value = value;
-        }
+        public int Value { get; } = value;
 
         public int CompareTo(CardId other) => Value.CompareTo(other.Value);
         public bool Equals(CardId other) => Value.Equals(other.Value);
@@ -32,14 +27,9 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<CollectionId>))]
-    public readonly struct CollectionId: INewTypeComp<CollectionId, int>
+    public readonly struct CollectionId(int value) : INewTypeComp<CollectionId, int>
     {
-        public int Value { get; }
-
-        public CollectionId(int value)
-        {
-            Value = value;
-        }
+        public int Value { get; } = value;
 
         public int CompareTo(CollectionId other) => Value.CompareTo(other.Value);
         public bool Equals(CollectionId other) => Value.Equals(other.Value);
@@ -60,14 +50,9 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DashboardId>))]
-    public readonly struct DashboardId: INewTypeComp<DashboardId, int>
+    public readonly struct DashboardId(int value) : INewTypeComp<DashboardId, int>
     {
-        public int Value { get; }
-
-        public DashboardId(int value)
-        {
-            Value = value;
-        }
+        public int Value { get; } = value;
 
         public int CompareTo(DashboardId other) => Value.CompareTo(other.Value);
         public bool Equals(DashboardId other) => Value.Equals(other.Value);
@@ -88,14 +73,9 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DashboardCardId>))]
-    public readonly struct DashboardCardId: INewTypeComp<DashboardCardId, int>
+    public readonly struct DashboardCardId(int value) : INewTypeComp<DashboardCardId, int>
     {
-        public int Value { get; }
-
-        public DashboardCardId(int value)
-        {
-            Value = value;
-        }
+        public int Value { get; } = value;
 
         public int CompareTo(DashboardCardId other) => Value.CompareTo(other.Value);
         public bool Equals(DashboardCardId other) => Value.Equals(other.Value);
@@ -116,14 +96,9 @@ namespace metabase_exporter
     }
 
     [JsonConverter(typeof(IdJsonConverter<DatabaseId>))]
-    public readonly struct DatabaseId : INewTypeComp<DatabaseId, int>
+    public readonly struct DatabaseId(int value) : INewTypeComp<DatabaseId, int>
     {
-        public int Value { get; }
-
-        public DatabaseId(int value)
-        {
-            Value = value;
-        }
+        public int Value { get; } = value;
 
         public int CompareTo(DatabaseId other) => Value.CompareTo(other.Value);
         public bool Equals(DatabaseId other) => Value.Equals(other.Value);
