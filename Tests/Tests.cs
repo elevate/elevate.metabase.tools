@@ -16,9 +16,10 @@ public static class Tests
     public static async Task ImportTestExport()
     {
         //Environment.SetEnvironmentVariable("TESTCONTAINERS_RYUK_DISABLED", "true");
+        await using var metabase = await BuildMetabaseContainer();
         var commonArgs = new Dictionary<string, string>
         {
-            { "MetabaseApi:Url", $"http://{metabase.Value.Hostname}:{metabase.Value.GetMappedPublicPort(metabasePort)}" },
+            { "MetabaseApi:Url", $"http://{metabase.Hostname}:{metabase.GetMappedPublicPort(metabasePort)}" },
             { "MetabaseApi:Username", user },
             { "MetabaseApi:Password", password },
             { "MetabaseApi:IgnoreSSLErrors", "true" }
@@ -59,21 +60,16 @@ public static class Tests
             r.Add(kv.Key, kv.Value);
         return r;
     }
-    
-    private static Lazy<PostgreSqlContainer> postgres = new(() =>
+
+    static async Task<IContainer> BuildMetabaseContainer()
     {
-        var container = new PostgreSqlBuilder()
+        var postgres = new PostgreSqlBuilder()
             .WithImage("postgres:16")
             .Build();
-        container.StartAsync().GetAwaiter().GetResult();
-        return container;
-    });
-
-    private static Lazy<IContainer> metabase = new(() =>
-    {
+        await postgres.StartAsync();
         using var docker = new DockerClientConfiguration().CreateClient();
         var privateIP = docker.Networks.InspectNetworkAsync("bridge").GetAwaiter().GetResult().IPAM.Config[0].Gateway;
-        var connString = new NpgsqlConnectionStringBuilder(postgres.Value.GetConnectionString());
+        var connString = new NpgsqlConnectionStringBuilder(postgres.GetConnectionString());
         var container = new ContainerBuilder()
             .WithImage("metabase/metabase:v0.44.7.3")
             .WithPortBinding(metabasePort, assignRandomHostPort: true)
@@ -87,7 +83,7 @@ public static class Tests
                 {"MB_DB_PASS", connString.Password!},
             })
             .Build();
-        container.StartAsync().GetAwaiter().GetResult();
+        await container.StartAsync();
         
         using var conn = new NpgsqlConnection(connString.ToString());
         conn.Open();
@@ -104,7 +100,7 @@ public static class Tests
         
         cmd.ExecuteNonQuery();
         return container;
-    });
+    }
  
     const string password = "123456";
     const string user = "mauricioscheffer@gmail.com";
