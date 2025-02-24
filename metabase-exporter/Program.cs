@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -102,7 +103,7 @@ public static class Program
                     throw new Exception($"Invalid IgnoreDatabases value: '{x}'", e);
                 }
             })
-            .ToList();
+            .ToImmutableList();
     }
 
     static IReadOnlyDictionary<DatabaseId, DatabaseId> ParseDatabaseMapping(IConfiguration rawConfig)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -40,12 +41,12 @@ public static class MetabaseApiExport
             .Where(dashboard => dashboard.CollectionId.HasValue == false || exportedCollections.Any(collection => collection.Id == dashboard.CollectionId))
             .OrderBy(x => x.Id)
             .ToArray();
-        var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToList());
+        var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToImmutableList());
         foreach (var dashboard in nonArchivedDashboards)
         {
             var oldDashboardId = dashboard.Id;
             dashboard.Id = dashboardMapping.GetOrThrow(dashboard.Id, "Dashboard not found in mapping");
-            var dashboardCardMapping = Renumber(dashboard.Cards.Select(x => x.Id).ToList());
+            var dashboardCardMapping = Renumber(dashboard.Cards.Select(x => x.Id).ToImmutableList());
             foreach (var card in dashboard.Cards.OrderBy(x => x.Id))
             {
                 card.Id = dashboardCardMapping.GetOrThrow(card.Id, $"Card not found in dashboard card mapping for dashboard {oldDashboardId}");
@@ -77,7 +78,7 @@ public static class MetabaseApiExport
             .Where(x => x.CollectionId == null || collectionMapping.ContainsKey(x.CollectionId.Value))
             .OrderBy(x => x.Id)
             .ToArray();
-        var cardMapping = Renumber(cardsToExport.Select(x => x.Id).ToList());
+        var cardMapping = Renumber(cardsToExport.Select(x => x.Id).ToImmutableList());
         foreach (var card in cardsToExport)
         {
             var newId = cardMapping.GetOrThrow(card.Id, "Card not found in card mapping");
@@ -107,7 +108,7 @@ public static class MetabaseApiExport
             .Where(x => excludePersonalCollections == false || x.IsPersonal() == false)
             .OrderBy(x => x.Id)
             .ToArray();
-        var collectionMapping = Renumber(collectionsToExport.Select(x => x.Id).ToList());
+        var collectionMapping = Renumber(collectionsToExport.Select(x => x.Id).ToImmutableList());
         foreach (var collection in collectionsToExport)
         {
             collection.Id = collectionMapping.GetOrThrow(collection.Id, "Collection not found in collection mapping");

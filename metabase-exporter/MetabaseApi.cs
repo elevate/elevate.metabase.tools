@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -247,7 +248,7 @@ public record MetabaseApi(
         try
         {
             var databases = JsonConvert.DeserializeObject<JObject>(response)["data"];
-            return databases.Select(d => new DatabaseId((int) d["id"])).ToList();
+            return databases.Select(d => new DatabaseId((int) d["id"])).ToImmutableList();
         }
         catch (JsonSerializationException e)
         {

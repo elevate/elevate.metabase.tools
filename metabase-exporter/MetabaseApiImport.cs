@@ -43,7 +43,7 @@ public static class MetabaseApiImport
         var cardMapping = partialCardMapping
             .Where(x => x.Source.HasValue && x.Target.HasValue)
             .Select(x => new Mapping<CardId>(x.Source.Value, x.Target.Value))
-            .ToList();
+            .ToImmutableList();
 
         Console.WriteLine("Creating dashboards...");
         foreach (var dashboard in state.Dashboards)
@@ -66,7 +66,7 @@ public static class MetabaseApiImport
             .Where(x => databaseMapping.ContainsKey(x) == false)
             .Distinct()
             .Except(ignoredDatabases)
-            .ToList();
+            .ToImmutableList();
         if (missingDatabaseIdsInMapping.Count > 0)
         {
             throw new Exception("Missing databases in mapping: " + string.Join(",", missingDatabaseIdsInMapping));
@@ -76,7 +76,7 @@ public static class MetabaseApiImport
     static async Task ValidateTargetDatabaseMapping(this MetabaseApi api, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping)
     {
         var databaseIds = await api.GetAllDatabaseIds();
-        var incorrectMappings = databaseMapping.Where(kv => databaseIds.Contains(kv.Value) == false).ToList();
+        var incorrectMappings = databaseMapping.Where(kv => databaseIds.Contains(kv.Value) == false).ToImmutableList();
         if (incorrectMappings.Count > 0)
         {
             throw new Exception("Mappings referencing invalid databases: " +
@@ -112,7 +112,7 @@ public static class MetabaseApiImport
     static async Task MapAndCreateDashboard(this MetabaseApi api, Dashboard stateDashboard,
         IReadOnlyList<Mapping<CardId>> cardMapping, IReadOnlyList<Mapping<Collection>> collectionMapping)
     {
-        var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToList();
+        var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToImmutableList();
         if (stateDashboard.CollectionId.HasValue)
         {
             stateDashboard.CollectionId = collectionMapping
@@ -168,10 +168,10 @@ public static class MetabaseApiImport
         // collections can't be deleted so we have to match existing collections or create new ones
 
         var allExistingCollections = await api.GetAllCollections();
-        var nonArchivedExistingCollections = allExistingCollections.Where(x => x.Archived == false).ToList();
+        var nonArchivedExistingCollections = allExistingCollections.Where(x => x.Archived == false).ToImmutableList();
         var collectionsToCreate = stateCollections
             .Where(c => nonArchivedExistingCollections.Select(x => x.Name).Contains(c.Name) == false)
-            .ToList();
+            .ToImmutableList();
 
         var createdCollections = await collectionsToCreate
             .Traverse(async collectionFromState => {
@@ -191,9 +191,9 @@ public static class MetabaseApiImport
                 )
             )
             .Where(x => x.Target != null)
-            .ToList();
+            .ToImmutableList();
 
-        var collectionMapping = createdCollections.Concat(mappedExistingCollections).ToList();
+        var collectionMapping = createdCollections.Concat(mappedExistingCollections).ToImmutableList();
 
         return collectionMapping;
     }
