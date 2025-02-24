@@ -20,14 +20,13 @@ Other features (e.g. pulses) are not supported simply because I don't need them 
 ## Usage
 
 Parameters can be given via [command-line, appsettings.json or environment variables](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers).
-There are two modes of operation, given by the `Command` parameter: `import` or `export`.
 
-Regardless of the operation, the Metabase API settings must be configured. E.g. in appsettings.json:
+For all operations the Metabase API settings must be configured. E.g. in appsettings.json:
 
 ```json
 {
   "MetabaseApi": {
-    "Url": "https://metabase-local.elevatedirect.com:32443",
+    "Url": "https://localhost:32443",
     "Username": "mauricio@elevatedirect.com",
     "Password":  "123456789"
   }
@@ -52,3 +51,9 @@ The `DatabaseMapping` settings map Metabase database IDs in the state file to da
 In the example above, it maps:
 * the database ID 1 in the file to the database ID 2 in the target Metabase instance
 * the database ID 2 in the file to the database ID 3 in the target Metabase instance
+
+### Test questions
+
+This runs the queries in all Metabase Questions/Cards. Use it to test that the queries (i.e. SQL) are valid.
+
+`metabase-exporter.exe Command=test-questions`
