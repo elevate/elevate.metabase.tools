@@ -36,7 +36,7 @@ namespace metabase_exporter
                 .Traverse(async cardFromState => {
                     var source = cardFromState.Id;
                     var target = await api.MapAndCreateCard(cardFromState, collectionMapping, databaseMapping, ignoredDatabases);
-                    var mapping = new Mapping<CardId?>(source: source, target: target?.Id);
+                    var mapping = new Mapping<CardId?>(Source: source, Target: target?.Id);
                     return mapping;
                 });
 
@@ -177,8 +177,8 @@ namespace metabase_exporter
                 .Traverse(async collectionFromState => {
                     Console.WriteLine($"Creating collection '{collectionFromState.Name}'");
                     var mapping = new Mapping<Collection>(
-                                           source: collectionFromState,
-                                           target: await api.CreateCollection(collectionFromState)
+                                           Source: collectionFromState,
+                                           Target: await api.CreateCollection(collectionFromState)
                                        );
                     return mapping;
                 });
@@ -186,8 +186,8 @@ namespace metabase_exporter
             var mappedExistingCollections = stateCollections
                 .Select(collectionFromState =>
                     new Mapping<Collection>(
-                        source: collectionFromState,
-                        target: nonArchivedExistingCollections.FirstOrDefault(x => x.Name == collectionFromState.Name)
+                        Source: collectionFromState,
+                        Target: nonArchivedExistingCollections.FirstOrDefault(x => x.Name == collectionFromState.Name)
                     )
                 )
                 .Where(x => x.Target != null)
@@ -228,18 +228,9 @@ namespace metabase_exporter
             return cardFromState;
         }
 
-        class Mapping<T>
-        {
-            public T Source { get; }
-            public T Target { get; }
-
-            public Mapping(T source, T target)
-            {
-                Source = source;
-                Target = target;
-            }
-        }
-
-
+        record Mapping<T>(
+            T Source,
+            T Target
+        );
     }
 }
