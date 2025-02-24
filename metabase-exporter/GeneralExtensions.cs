@@ -40,10 +40,8 @@ namespace metabase_exporter
 
         public static string MD5Base64(string x)
         {
-            using (var md5 = System.Security.Cryptography.MD5.Create()) {
-                byte[] md5Value = md5.ComputeHash(Encoding.UTF8.GetBytes(x));
-                return Convert.ToBase64String(md5Value);
-            }            
+            var md5Value = System.Security.Cryptography.MD5.HashData(Encoding.UTF8.GetBytes(x));
+            return Convert.ToBase64String(md5Value);
         }
 
         public static TValue GetOrThrow<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dict, TKey key, string error)
