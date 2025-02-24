@@ -1,14 +1,15 @@
-# elevate.metabase.tools
-Tools for managing [Metabase](https://www.metabase.com/) .
-
-[Docker images on docker hub](https://hub.docker.com/r/elevate/elevate.metabase.tools/).
-
-Or [install Nix](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#the-determinate-nix-installer) and then run it with e.g. `nix run github:elevate/elevate.metabase.tools -- Command=Import ...`
-
 # Metabase-exporter
+
+Tools for managing [Metabase](https://www.metabase.com/) .
 
 Used to export/import the current state of Metabase (questions/dashboards/collections) to/from a JSON file. 
 This file can then be stored on git for versioning.
+
+To use this [install Nix](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#the-determinate-nix-installer) and then run it with e.g. `nix run github:elevate/elevate.metabase.tools -- Command=Import ...`
+
+If you're on Windows or want to develop, install the .NET 8 SDK and run it from the `metabase-exporter` with e.g. `dotnet run -- Command=Import ...`
+
+See usage flags below.
 
 ## Limitations
 
