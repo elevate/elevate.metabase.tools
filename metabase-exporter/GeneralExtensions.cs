@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace metabase_exporter;
 
@@ -40,8 +42,10 @@ public static class GeneralExtensions
 
     public static string MD5Base64(string x)
     {
-        var md5Value = System.Security.Cryptography.MD5.HashData(Encoding.UTF8.GetBytes(x));
-        return Convert.ToBase64String(md5Value);
+        using (var md5 = System.Security.Cryptography.MD5.Create()) {
+            byte[] md5Value = md5.ComputeHash(Encoding.UTF8.GetBytes(x));
+            return Convert.ToBase64String(md5Value);
+        }            
     }
 
     public static TValue GetOrThrow<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dict, TKey key, string error)
@@ -51,6 +55,21 @@ public static class GeneralExtensions
             return value;
         }
         throw new KeyNotFoundException($"Key not found: {key}\n{error}");
+    }
+
+    public static T DeserializeObject<T>(this JsonSerializer serializer, string rawJson)
+    {
+        using var reader = new StringReader(rawJson);
+        using var jsonReader = new JsonTextReader(reader);
+        return serializer.Deserialize<T>(jsonReader);
+    }
+
+    public static string SerializeObject<T>(this JsonSerializer serializer, T obj)
+    {
+        using var writer = new StringWriter();
+        using var jsonWriter = new JsonTextWriter(writer);
+        serializer.Serialize(jsonWriter, obj);
+        return writer.ToString();
     }
 
 }
