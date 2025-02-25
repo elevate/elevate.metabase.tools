@@ -39,7 +39,7 @@ public static class Program
         var api = await InitApi(config.MetabaseApiSettings);
         await config.Switch(
             export: api.Export, 
-            import: api.Import, 
+            import: c => c.Merge ? api.ImportMerge(c) : api.Import(c),
             testQuestions: _ => api.TestQuestions());
     }
 
@@ -64,6 +64,14 @@ public static class Program
         Console.WriteLine($"Done importing from {import.InputFilename} into {import.MetabaseApiSettings.MetabaseApiUrl}");
     }
 
+    static async Task ImportMerge(this MetabaseApi api, Config.Import import)
+    {
+        var rawState = File.ReadAllText(import.InputFilename);
+        var state = JsonConvert.DeserializeObject<MetabaseState>(rawState);
+        await api.ImportMerge(state, import.DatabaseMapping, import.IgnoredDatabases);
+        Console.WriteLine($"Done importing from {import.InputFilename} into {import.MetabaseApiSettings.MetabaseApiUrl}");
+    }
+
     [Pure]
     static Config ParseConfig(IConfiguration rawConfig)
     {
@@ -76,9 +84,11 @@ public static class Program
             {
                 throw new Exception("Missing InputFilename config");
             }
+
+            bool.TryParse(rawConfig["Merge"], out var merge);
             var ignoreDatabases = ParseIgnoreDatabases(rawConfig);
             var databaseMapping = ParseDatabaseMapping(rawConfig);
-            return new Config.Import(apiSettings, inputFilename, databaseMapping, ignoreDatabases);
+            return new Config.Import(apiSettings, inputFilename, merge, databaseMapping, ignoreDatabases);
         }
         else if (StringComparer.InvariantCultureIgnoreCase.Equals(command, "export"))
         {

@@ -84,7 +84,7 @@ public static class MetabaseApiImport
         }
     }
 
-    static async Task ValidateDatabaseMapping(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases)
+    public static async Task ValidateDatabaseMapping(this MetabaseApi api, MetabaseState state, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases)
     {
         ValidateSourceDatabaseMapping(state, databaseMapping, ignoredDatabases);
         await api.ValidateTargetDatabaseMapping(databaseMapping);
@@ -125,7 +125,7 @@ public static class MetabaseApiImport
         await api.AddCardsToDashboard(stateDashboard.Id, mappedCards);
     }
 
-    static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<CardId>> cardMapping)
+    public static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<CardId>> cardMapping)
     {
         foreach (var card in stateDashboardCards)
         {
@@ -163,7 +163,7 @@ public static class MetabaseApiImport
         }
     }
 
-    static async Task<IReadOnlyList<Mapping<Collection>>> MapAndCreateCollections(this MetabaseApi api, IReadOnlyList<Collection> stateCollections)
+    public static async Task<IReadOnlyList<Mapping<Collection>>> MapAndCreateCollections(this MetabaseApi api, IReadOnlyList<Collection> stateCollections)
     {
         // collections can't be deleted so we have to match existing collections or create new ones
 
@@ -227,9 +227,4 @@ public static class MetabaseApiImport
         await api.CreateCard(cardFromState);
         return cardFromState;
     }
-
-    record Mapping<T>(
-        T Source,
-        T Target
-    );
 }

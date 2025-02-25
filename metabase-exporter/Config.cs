@@ -32,12 +32,14 @@ public abstract record Config
     public sealed record Import: Config
     {
         public string InputFilename { get; }
+        public bool Merge { get; }
         public IReadOnlyDictionary<DatabaseId, DatabaseId> DatabaseMapping { get; }
         public IReadOnlyList<DatabaseId> IgnoredDatabases { get; }
 
-        public Import(MetabaseApiSettings MetabaseApiSettings, string inputFilename, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases): base(MetabaseApiSettings)
+        public Import(MetabaseApiSettings MetabaseApiSettings, string inputFilename, bool merge, IReadOnlyDictionary<DatabaseId, DatabaseId> databaseMapping, IReadOnlyList<DatabaseId> ignoredDatabases): base(MetabaseApiSettings)
         {
             InputFilename = inputFilename;
+            Merge = merge;
             DatabaseMapping = databaseMapping;
             IgnoredDatabases = ignoredDatabases;
         }

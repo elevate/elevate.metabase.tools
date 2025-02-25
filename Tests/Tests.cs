@@ -17,13 +17,7 @@ public static class Tests
     {
         //Environment.SetEnvironmentVariable("TESTCONTAINERS_RYUK_DISABLED", "true");
         await using var metabase = await BuildMetabaseContainer();
-        var commonArgs = new Dictionary<string, string>
-        {
-            { "MetabaseApi:Url", $"http://{metabase.Hostname}:{metabase.GetMappedPublicPort(metabasePort)}" },
-            { "MetabaseApi:Username", user },
-            { "MetabaseApi:Password", password },
-            { "MetabaseApi:IgnoreSSLErrors", "true" }
-        };
+        var commonArgs = BuildMetabaseApiSettings(metabase);
         
         const string inputFilename = "metabase-state.json";
         await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
@@ -47,10 +41,56 @@ public static class Tests
 
         var output = await File.ReadAllTextAsync(outputFilename);
         var input = await File.ReadAllTextAsync(inputFilename);
-        
-        CompareStates(input, output);
+        CompareStates(expected: input, actual: output);
     }
-    
+
+    [Fact]
+    public static async Task ImportMergeExport()
+    {
+        await using var metabase = await BuildMetabaseContainer();
+        var commonArgs = BuildMetabaseApiSettings(metabase);
+        
+        const string inputFilename = "metabase-state.json";
+        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+            { "Merge", true.ToString()},
+            { "DatabaseMapping:1", "1"}
+        }).ToCommandline());
+
+        const string outputFilename = "test.json";
+        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
+        {
+            { "Command", "export"},
+            { "OutputFilename", outputFilename},
+        }).ToCommandline());
+
+        var output = await File.ReadAllTextAsync(outputFilename);
+        var input = await File.ReadAllTextAsync(inputFilename);
+        CompareStates(expected: input, actual: output);
+
+        // import-merge should be idempotent
+        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+            { "Merge", true.ToString()},
+            { "DatabaseMapping:1", "1"}
+        }).ToCommandline());
+
+        await Program.Main(commonArgs.AddMany(new Dictionary<string, string>
+        {
+            { "Command", "export"},
+            { "OutputFilename", outputFilename},
+        }).ToCommandline());
+
+        output = await File.ReadAllTextAsync(outputFilename);
+        input = await File.ReadAllTextAsync(inputFilename);
+
+        CompareStates(expected: input, actual: output);
+    }
+
     static void CompareStates(string expected, string actual)
     {
         var actualState = Program.Serializer.DeserializeObject<MetabaseState>(actual);
@@ -72,12 +112,20 @@ public static class Tests
         
         Assert.Equal(expected, actual);
     }
-    
+
+    static IReadOnlyDictionary<string, string> BuildMetabaseApiSettings(IContainer metabase) =>
+        new Dictionary<string, string>
+        {
+            { "MetabaseApi:Url", $"http://{metabase.Hostname}:{metabase.GetMappedPublicPort(metabasePort)}" },
+            { "MetabaseApi:Username", user },
+            { "MetabaseApi:Password", password },
+            { "MetabaseApi:IgnoreSSLErrors", "true" }
+        };
 
     static string[] ToCommandline(this IDictionary<string, string> x) => 
         x.Select(kv => $"{kv.Key}={kv.Value}").ToArray();
 
-    static Dictionary<string, string> AddMany(this IDictionary<string, string> a, IDictionary<string, string> b)
+    static Dictionary<string, string> AddMany(this IReadOnlyDictionary<string, string> a, IDictionary<string, string> b)
     {
         var r = new Dictionary<string, string>(a);
         foreach (var kv in b)

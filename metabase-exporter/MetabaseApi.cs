@@ -21,6 +21,25 @@ public record MetabaseApi(
         card.Id = createdCard.Id;
         await PutCard(card);
     }
+        
+    public async Task UpsertCardByName(Card updatedCard, IReadOnlyCollection<Card> existingCards)
+    {
+        var matchingCards = existingCards.Where(c => c.Name == updatedCard.Name).ToImmutableList();
+        if (matchingCards.Count > 1)
+        {
+            throw new Exception($"Multiple existing cards with name '{updatedCard.Name}', can't upsert by name");
+        } 
+        if (matchingCards.Count == 0)
+        {
+            await CreateCard(updatedCard);
+        }
+        else
+        {
+            updatedCard.Id = matchingCards[0].Id;
+            await PutCard(updatedCard);
+        }
+        
+    }
 
     async Task<Card> PostCard(Card card)
     {
@@ -55,6 +74,26 @@ public record MetabaseApi(
         var createdDashboard = await PostDashboard(dashboard);
         dashboard.Id = createdDashboard.Id;
         await PutDashboard(dashboard);
+    }
+
+    public async Task UpsertDashboardByName(Dashboard dashboard, IReadOnlyCollection<Dashboard> existingDashboards)
+    {
+        var matchingDashboards = existingDashboards.Where(c => c.Name == dashboard.Name).ToImmutableList();
+        if (matchingDashboards.Count > 1)
+        {
+            throw new Exception($"Multiple existing dashboards with name '{dashboard.Name}', can't upsert by name");
+        }
+
+        if (matchingDashboards.Count == 0)
+        {
+            await CreateDashboard(dashboard);
+        }
+        else
+        {
+            await DeleteDashboard(matchingDashboards[0].Id);
+            await CreateDashboard(dashboard);
+        }
+        
     }
 
     async Task<Dashboard> PostDashboard(Dashboard dashboard)
