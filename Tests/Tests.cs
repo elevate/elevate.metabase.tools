@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using System.Collections.Immutable;
 using Docker.DotNet;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -47,8 +47,29 @@ public static class Tests
 
         var output = await File.ReadAllTextAsync(outputFilename);
         var input = await File.ReadAllTextAsync(inputFilename);
-        Assert.Equal(input, output);
+        
+        CompareStates(input, output);
     }
+    
+    static void CompareStates(string expected, string actual)
+    {
+        var actualState = Program.Serializer.DeserializeObject<MetabaseState>(actual);
+        Assert.NotNull(actualState);
+        var expectedState = Program.Serializer.DeserializeObject<MetabaseState>(expected);
+        Assert.NotNull(expectedState);
+        Assert.True(expectedState.Collections.Length == actualState.Collections.Length, $"Different collection length. Expected {expectedState.Collections.Length}, was {actualState.Collections.Length}");
+        Assert.True(expectedState.Dashboards.Length == actualState.Dashboards.Length, $"Different dashboard length. Expected {expectedState.Dashboards.Length}, was {actualState.Dashboards.Length}");
+        Assert.True(expectedState.Cards.Length == actualState.Cards.Length, $"Different card length. Expected {expectedState.Cards.Length}, was {actualState.Cards.Length}");
+        foreach (var dashboard in expectedState.Dashboards)
+        {
+            var matchingDashboards = actualState.Dashboards.Where(d => d.Name == dashboard.Name).ToImmutableList();
+            var matchingDashboard = Assert.Single(matchingDashboards);
+            Assert.True(dashboard.Cards.Length == matchingDashboard.Cards.Length, $"Different card length for dashboard '{dashboard.Name}'. Expected {dashboard.Cards.Length}, was {matchingDashboard.Cards.Length}");
+        }
+        
+        Assert.Equal(expected, actual);
+    }
+    
 
     static string[] ToCommandline(this IDictionary<string, string> x) => 
         x.Select(kv => $"{kv.Key}={kv.Value}").ToArray();
