@@ -196,10 +196,10 @@ public class DashboardCard
     [JsonProperty("row")]
     public int Row { get; set; }
 
-    [JsonProperty("sizeX")]
+    [JsonPropertyAlt("size_x", "sizeX")]
     public int SizeX { get; set; }
 
-    [JsonProperty("sizeY")]
+    [JsonPropertyAlt("size_y", "sizeY")]
     public int SizeY { get; set; }
 
     /// <summary>

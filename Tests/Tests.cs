@@ -66,6 +66,9 @@ public static class Tests
             var matchingDashboard = Assert.Single(matchingDashboards);
             Assert.True(dashboard.Cards.Length == matchingDashboard.Cards.Length, $"Different card length for dashboard '{dashboard.Name}'. Expected {dashboard.Cards.Length}, was {matchingDashboard.Cards.Length}");
         }
+
+        expected = Program.Serializer.SerializeObject(expectedState);
+        actual = Program.Serializer.SerializeObject(actualState);
         
         Assert.Equal(expected, actual);
     }
@@ -92,7 +95,7 @@ public static class Tests
         var privateIP = docker.Networks.InspectNetworkAsync("bridge").GetAwaiter().GetResult().IPAM.Config[0].Gateway;
         var connString = new NpgsqlConnectionStringBuilder(postgres.GetConnectionString());
         var container = new ContainerBuilder()
-            .WithImage("metabase/metabase:v0.44.7.3")
+            .WithImage("metabase/metabase:v0.45.2.1")
             .WithPortBinding(metabasePort, assignRandomHostPort: true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Metabase Initialization COMPLETE"))
             .WithEnvironment(new Dictionary<string, string>

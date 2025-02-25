@@ -28,10 +28,12 @@ public static class Program
         _serializer = JsonSerializer.Create(new JsonSerializerSettings
         {
             //Formatting = Formatting.Indented // don't set this, it will mess checksums
+            ContractResolver = new AltNameContractResolver(),
         });
         _indentedSerializer = JsonSerializer.Create(new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
+            ContractResolver = new AltNameContractResolver(),
         });
             
         var api = await InitApi(config.MetabaseApiSettings);
