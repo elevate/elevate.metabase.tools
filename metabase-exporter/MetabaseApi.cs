@@ -51,7 +51,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
         try
         {
-            return Program.Serializer.DeserializeObject<Card>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<Card>(response);
         }
         catch (JsonSerializationException e)
         {
@@ -106,7 +106,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
         try
         {
-            return Program.Serializer.DeserializeObject<Dashboard>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<Dashboard>(response);
         }
         catch (JsonSerializationException e)
         {
@@ -180,7 +180,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request1);
         try
         {
-            return Program.Serializer.DeserializeObject<DashboardCard>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<DashboardCard>(response);
         }
         catch (JsonSerializationException e)
         {
@@ -198,7 +198,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
         try
         {
-            return Program.Serializer.DeserializeObject<Collection>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<Collection>(response);
         }
         catch (JsonSerializationException e)
         {
@@ -208,7 +208,7 @@ public record MetabaseApi(
 
     static (StringContent HttpContent, string Json) ToJsonContent(object o)
     {
-        var json = Program.Serializer.SerializeObject(o);
+        var json = MetabaseJsonSerializer.Serializer.SerializeObject(o);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         return (content, json);
     }
@@ -230,7 +230,7 @@ public record MetabaseApi(
         HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/card", UriKind.Relative));
         var response = await sessionManager.Send(request);
         try {
-            return Program.Serializer.DeserializeObject<Card[]>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<Card[]>(response);
         } catch (JsonReaderException e) {
             throw new MetabaseApiException($"Error parsing response for {nameof(Card)} from:\n{response}", e);
         }
@@ -243,7 +243,7 @@ public record MetabaseApi(
         response = response.Replace("\"id\":\"root\"", "\"id\":\"0\"");
         try
         {
-            return Program.Serializer.DeserializeObject<Collection[]>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<Collection[]>(response);
         }
         catch (JsonSerializationException e)
         {
@@ -256,7 +256,7 @@ public record MetabaseApi(
         HttpRequestMessage request() => new HttpRequestMessage(HttpMethod.Get, new Uri("/api/dashboard", UriKind.Relative));
         var response = await sessionManager.Send(request);
         try {
-            var dashboards = Program.Serializer.DeserializeObject<Dashboard[]>(response);
+            var dashboards = MetabaseJsonSerializer.Serializer.DeserializeObject<Dashboard[]>(response);
             // the endpoint that returns all dashboards does not include all detail for each dashboard
             return await dashboards.Traverse(async dashboard => await GetDashboard(dashboard.Id));
         }
@@ -272,7 +272,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
         try
         {
-            return Program.Serializer.DeserializeObject<Dashboard>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<Dashboard>(response);
         }
         catch (JsonSerializationException e)
         {
@@ -286,7 +286,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
         try
         {
-            var databases = Program.Serializer.DeserializeObject<JObject>(response)["data"];
+            var databases = MetabaseJsonSerializer.Serializer.DeserializeObject<JObject>(response)["data"];
             return databases.Select(d => new DatabaseId((int) d["id"])).ToImmutableList();
         }
         catch (JsonSerializationException e)
@@ -301,7 +301,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
         try
         {
-            return Program.Serializer.DeserializeObject<RunCardResult>(response);
+            return MetabaseJsonSerializer.Serializer.DeserializeObject<RunCardResult>(response);
         }
         catch (JsonSerializationException e)
         {

@@ -25,17 +25,6 @@ public static class Program
         var rawConfig = builder.Build();
         var config = ParseConfig(rawConfig);
             
-        _serializer = JsonSerializer.Create(new JsonSerializerSettings
-        {
-            //Formatting = Formatting.Indented // don't set this, it will mess checksums
-            ContractResolver = new AltNameContractResolver(),
-        });
-        _indentedSerializer = JsonSerializer.Create(new JsonSerializerSettings
-        {
-            Formatting = Formatting.Indented,
-            ContractResolver = new AltNameContractResolver(),
-        });
-            
         var api = await InitApi(config.MetabaseApiSettings);
         await config.Switch(
             export: api.Export, 
@@ -45,15 +34,11 @@ public static class Program
         );
     }
 
-    static JsonSerializer _serializer;
-    public static JsonSerializer Serializer => _serializer;
-
-    static JsonSerializer _indentedSerializer;
 
     static async Task Export(this MetabaseApi api, Config.Export export)
     {
         var state = await api.Export(export.ExcludePersonalCollections);
-        var stateJson = _indentedSerializer.SerializeObject(state);
+        var stateJson = MetabaseJsonSerializer.IndentedSerializer.SerializeObject(state);
         File.WriteAllText(path: export.OutputFilename, contents: stateJson);
         Console.WriteLine($"Exported current state for {export.MetabaseApiSettings.MetabaseApiUrl} to {export.OutputFilename}");
     }
@@ -61,7 +46,7 @@ public static class Program
     static async Task Import(this MetabaseApi api, Config.Import import)
     {
         var rawState = File.ReadAllText(import.InputFilename);
-        var state = Program.Serializer.DeserializeObject<MetabaseState>(rawState);
+        var state = MetabaseJsonSerializer.Serializer.DeserializeObject<MetabaseState>(rawState);
         await api.Import(state, import.DatabaseMapping, import.IgnoredDatabases);
         Console.WriteLine($"Done importing from {import.InputFilename} into {import.MetabaseApiSettings.MetabaseApiUrl}");
     }

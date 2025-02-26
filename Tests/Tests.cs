@@ -93,9 +93,9 @@ public static class Tests
 
     static void CompareStates(string expected, string actual)
     {
-        var actualState = Program.Serializer.DeserializeObject<MetabaseState>(actual);
+        var actualState = MetabaseJsonSerializer.Serializer.DeserializeObject<MetabaseState>(actual);
         Assert.NotNull(actualState);
-        var expectedState = Program.Serializer.DeserializeObject<MetabaseState>(expected);
+        var expectedState = MetabaseJsonSerializer.Serializer.DeserializeObject<MetabaseState>(expected);
         Assert.NotNull(expectedState);
         Assert.True(expectedState.Collections.Length == actualState.Collections.Length, $"Different collection length. Expected {expectedState.Collections.Length}, was {actualState.Collections.Length}");
         Assert.True(expectedState.Dashboards.Length == actualState.Dashboards.Length, $"Different dashboard length. Expected {expectedState.Dashboards.Length}, was {actualState.Dashboards.Length}");
@@ -107,8 +107,8 @@ public static class Tests
             Assert.True(dashboard.Cards.Length == matchingDashboard.Cards.Length, $"Different card length for dashboard '{dashboard.Name}'. Expected {dashboard.Cards.Length}, was {matchingDashboard.Cards.Length}");
         }
 
-        expected = Program.Serializer.SerializeObject(expectedState);
-        actual = Program.Serializer.SerializeObject(actualState);
+        expected = MetabaseJsonSerializer.Serializer.SerializeObject(expectedState);
+        actual = MetabaseJsonSerializer.Serializer.SerializeObject(actualState);
         
         Assert.Equal(expected, actual);
     }

@@ -23,7 +23,7 @@ public class Card
     public ResultMetadata[] ResultMetadata { get; set; }
 
     [JsonProperty("metadata_checksum")]
-    public string MetadataChecksum => GeneralExtensions.MD5Base64(Program.Serializer.SerializeObject(ResultMetadata));
+    public string MetadataChecksum => GeneralExtensions.MD5Base64(MetabaseJsonSerializer.Serializer.SerializeObject(ResultMetadata));
 
     [JsonProperty("database_id")]
     public DatabaseId DatabaseId { get; set; }

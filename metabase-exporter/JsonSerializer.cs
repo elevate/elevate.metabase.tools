@@ -162,3 +162,19 @@ public class AltNameContractResolver : DefaultContractResolver
                type == typeof(decimal);
     }
 }
+
+public static class MetabaseJsonSerializer
+{
+    public static readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings
+    {
+        //Formatting = Formatting.Indented // don't set this, it will mess checksums
+        ContractResolver = new AltNameContractResolver(),
+    });
+
+    public static readonly JsonSerializer IndentedSerializer = JsonSerializer.Create(new JsonSerializerSettings
+    {
+        Formatting = Formatting.Indented,
+        ContractResolver = new AltNameContractResolver(),
+    });
+    
+}
