@@ -44,7 +44,7 @@ public static class MetabaseApiImportMerge
         {
             await api.UpsertDashboardByName(dashboard, existingDashboards);
             var mappedCards = MetabaseApiImport.MapDashboardCards(dashboard.Cards, cardMapping).ToImmutableList();
-            await api.AddCardsToDashboard(dashboard.Id, mappedCards);
+            await api.PutCardsToDashboard(dashboard.Id, mappedCards);
         }
         
         Console.WriteLine("Done importing");

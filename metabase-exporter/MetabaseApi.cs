@@ -124,28 +124,7 @@ public record MetabaseApi(
         var response = await sessionManager.Send(request);
     }
 
-    public async Task AddCardsToDashboard(DashboardId dashboardId, IReadOnlyList<DashboardCard> cards)
-    {
-        var dashboardCardMapping = await cards
-            .Where(card => card.CardId.HasValue)
-            .Traverse(async card => {
-                var dashboardCard = await AddCardToDashboard(card, dashboardId);
-                return new
-                {
-                    stateDashboardCard = card, 
-                    newDashboardCard = dashboardCard.Id
-                };
-            });
-
-        foreach (var card in dashboardCardMapping)
-        {
-            card.stateDashboardCard.Id = card.newDashboardCard;
-        }
-
-        await PutCardsToDashboard(dashboardId, cards);
-    }
-
-    async Task PutCardsToDashboard(DashboardId dashboardId, IReadOnlyCollection<DashboardCard> cards)
+    public async Task PutCardsToDashboard(DashboardId dashboardId, IReadOnlyCollection<DashboardCard> cards)
     {
         var content = new Dictionary<string, object>
         {
@@ -168,29 +147,7 @@ public record MetabaseApi(
             throw new MetabaseApiException($"Error putting cards to dashboard {dashboardId}:\n{jsonContent.Json}", e);
         }
     }
-
-    async Task<DashboardCard> AddCardToDashboard(DashboardCard card, DashboardId dashboardId)
-    {
-        var jobj = JObject.Parse(MetabaseJsonSerializer.Serializer.SerializeObject(card));
-        jobj.Remove("card_id");
-        jobj["cardId"] = card.CardId?.Value; // no idea why Metabase wants cardId for this specific endpoint
-        
-        HttpRequestMessage request1() =>
-            new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
-            {
-                Content = ToJsonContent(jobj).HttpContent
-            };
-        var response = await sessionManager.Send(request1);
-        try
-        {
-            return MetabaseJsonSerializer.Serializer.DeserializeObject<DashboardCard>(response);
-        }
-        catch (JsonSerializationException e)
-        {
-            throw new MetabaseApiException($"Error parsing response for {nameof(DashboardCard)} from:\n{response}", e);
-        }
-    }
-
+    
     public async Task<Collection> CreateCollection(Collection collection)
     {
         HttpRequestMessage request() => 

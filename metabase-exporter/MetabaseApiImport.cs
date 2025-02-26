@@ -122,7 +122,7 @@ public static class MetabaseApiImport
         }
         Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
         await api.CreateDashboard(stateDashboard);
-        await api.AddCardsToDashboard(stateDashboard.Id, mappedCards);
+        await api.PutCardsToDashboard(stateDashboard.Id, mappedCards);
     }
 
     public static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<CardId>> cardMapping)
