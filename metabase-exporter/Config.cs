@@ -12,7 +12,7 @@ public abstract record Config
 
     public MetabaseApiSettings MetabaseApiSettings { get; }
 
-    public abstract T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions);
+    public abstract T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions, Func<Delete, T> delete);
 
     public sealed record Export: Config
     {
@@ -25,7 +25,7 @@ public abstract record Config
             ExcludePersonalCollections = excludePersonalCollections;
         }
 
-        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
+        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions, Func<Delete, T> delete) =>
             export(this);
     }
 
@@ -44,7 +44,7 @@ public abstract record Config
             IgnoredDatabases = ignoredDatabases;
         }
 
-        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
+        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions, Func<Delete, T> delete) =>
             import(this);
     }
         
@@ -52,7 +52,22 @@ public abstract record Config
     {
         public TestQuestions(MetabaseApiSettings metabaseApiSettings) : base(metabaseApiSettings){}
 
-        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions) =>
+        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions, Func<Delete, T> delete) =>
             testQuestions(this);
+    }
+
+    public sealed record Delete : Config
+    {
+        public IReadOnlyList<CardId> Cards { get; }
+        public IReadOnlyList<DashboardId> Dashboards { get; }
+
+        public Delete(MetabaseApiSettings metabaseApiSettings, IReadOnlyList<CardId> cards, IReadOnlyList<DashboardId> dashboards) : base(metabaseApiSettings)
+        {
+            Cards = cards;
+            Dashboards = dashboards;
+        }
+        
+        public override T Switch<T>(Func<Export, T> export, Func<Import, T> import, Func<TestQuestions, T> testQuestions, Func<Delete, T> delete) =>
+            delete(this);
     }
 }

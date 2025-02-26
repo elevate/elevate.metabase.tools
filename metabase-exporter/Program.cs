@@ -40,7 +40,9 @@ public static class Program
         await config.Switch(
             export: api.Export, 
             import: c => c.Merge ? api.ImportMerge(c) : api.Import(c),
-            testQuestions: _ => api.TestQuestions());
+            testQuestions: _ => api.TestQuestions(),
+            delete: api.Delete
+        );
     }
 
     static JsonSerializer _serializer;
@@ -70,6 +72,50 @@ public static class Program
         var state = JsonConvert.DeserializeObject<MetabaseState>(rawState);
         await api.ImportMerge(state, import.DatabaseMapping, import.IgnoredDatabases);
         Console.WriteLine($"Done importing from {import.InputFilename} into {import.MetabaseApiSettings.MetabaseApiUrl}");
+    }
+
+    static async Task Delete(this MetabaseApi api, Config.Delete delete)
+    {
+        var allCards = await api.GetAllCards();
+        var allDashboards = await api.GetAllDashboards();
+
+        var matchedCards = (
+            from card in allCards
+            join cardToDelete in delete.Cards on card.Id equals cardToDelete
+            select card
+        ).ToImmutableList();
+
+        var matchedDashboards = (
+            from dashboard in allDashboards
+            join dashboardToDelete in delete.Dashboards on dashboard.Id equals dashboardToDelete
+            select dashboard
+        ).ToImmutableList();
+
+        var cardsNotFound = delete.Cards.Except(matchedCards.Select(x => x.Id)).ToImmutableList();
+        var dashboardsNotFound = delete.Dashboards.Except(matchedDashboards.Select(x => x.Id)).ToImmutableList();
+        if (cardsNotFound.Count > 0 || dashboardsNotFound.Count > 0)
+        {
+            var cardsMessage = cardsNotFound.Count > 0
+                ? $"{cardsNotFound.Count} cards not found: {string.Join(",", cardsNotFound)}"
+                : "";
+            var dashboardsMessage = dashboardsNotFound.Count > 0 
+                ? $"{dashboardsNotFound.Count} dashboards not found: {string.Join(",", dashboardsNotFound)}"
+                : "";
+            Console.WriteLine(string.Join("\n", [cardsMessage, dashboardsMessage]));
+            return;
+        }
+        
+        foreach (var card in matchedCards)
+        {
+            Console.WriteLine($"Deleting card '{card.Name}'...");
+            await api.DeleteCard(card.Id);
+        }
+
+        foreach (var dashboard in matchedDashboards)
+        {
+            Console.WriteLine($"Deleting dashboard '{dashboard.Name}'...");
+            await api.DeleteDashboard(dashboard.Id);
+        }
     }
 
     [Pure]
@@ -111,8 +157,9 @@ public static class Program
         else if (StringComparer.InvariantCultureIgnoreCase.Equals(command, "delete"))
         {
             var apiSettings = ParseApiSettings(rawConfig);
-            var cards = rawConfig["Cards"];
-            return new Config.Delete(apiSettings, [], []);
+            var cards = ParseIdList<CardId>(rawConfig, "Cards");
+            var dashboards = ParseIdList<DashboardId>(rawConfig, "Dashboards");
+            return new Config.Delete(apiSettings, cards, dashboards);
         }
         throw new Exception($"Invalid command '{command}', must be either 'import' or 'export' or 'test-questions' or 'delete'");
     }
