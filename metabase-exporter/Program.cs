@@ -86,7 +86,7 @@ public static class Program
             }
 
             bool.TryParse(rawConfig["Merge"], out var merge);
-            var ignoreDatabases = ParseIgnoreDatabases(rawConfig);
+            var ignoreDatabases = ParseIdList<DatabaseId>(rawConfig, "IgnoreDatabases");
             var databaseMapping = ParseDatabaseMapping(rawConfig);
             return new Config.Import(apiSettings, inputFilename, merge, databaseMapping, ignoreDatabases);
         }
@@ -108,12 +108,19 @@ public static class Program
             var apiSettings = ParseApiSettings(rawConfig);
             return new Config.TestQuestions(apiSettings);
         }
-        throw new Exception($"Invalid command '{command}', must be either 'import' or 'export' or 'test-questions'");
+        else if (StringComparer.InvariantCultureIgnoreCase.Equals(command, "delete"))
+        {
+            var apiSettings = ParseApiSettings(rawConfig);
+            var cards = rawConfig["Cards"];
+            return new Config.Delete(apiSettings, [], []);
+        }
+        throw new Exception($"Invalid command '{command}', must be either 'import' or 'export' or 'test-questions' or 'delete'");
     }
 
-    static IReadOnlyList<DatabaseId> ParseIgnoreDatabases(IConfiguration rawConfig)
+    static IReadOnlyList<TId> ParseIdList<TId>(IConfiguration rawConfig, string configKey)
+        where TId: INewTypeEq<TId, int>, new()
     {
-        var rawValue = rawConfig["IgnoreDatabases"];
+        var rawValue = rawConfig[configKey];
         if (string.IsNullOrWhiteSpace(rawValue))
         {
             return [];
@@ -123,16 +130,16 @@ public static class Program
             .Select(x => {
                 try
                 {
-                    return new DatabaseId(int.Parse(x));
+                    return new TId().New(int.Parse(x));
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"Invalid IgnoreDatabases value: '{x}'", e);
+                    throw new Exception($"Invalid {configKey} value: '{x}'", e);
                 }
             })
             .ToImmutableList();
     }
-
+    
     static IReadOnlyDictionary<DatabaseId, DatabaseId> ParseDatabaseMapping(IConfiguration rawConfig)
     {
         var rawDatabaseMapping = rawConfig.GetSection("DatabaseMapping");
