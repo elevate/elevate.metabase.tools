@@ -129,7 +129,7 @@ public record MetabaseApi(
         var dashboardCardMapping = await cards
             .Where(card => card.CardId.HasValue)
             .Traverse(async card => {
-                var dashboardCard = await AddCardToDashboard(cardId: card.CardId.Value, dashboardId: dashboardId);
+                var dashboardCard = await AddCardToDashboard(card, dashboardId);
                 return new
                 {
                     stateDashboardCard = card, 
@@ -169,13 +169,16 @@ public record MetabaseApi(
         }
     }
 
-    async Task<DashboardCard> AddCardToDashboard(CardId cardId, DashboardId dashboardId)
+    async Task<DashboardCard> AddCardToDashboard(DashboardCard card, DashboardId dashboardId)
     {
-        var content1 = JObj.Obj(new[] { JObj.Prop("cardId", cardId.Value) });
+        var jobj = JObject.Parse(MetabaseJsonSerializer.Serializer.SerializeObject(card));
+        jobj.Remove("card_id");
+        jobj["cardId"] = card.CardId?.Value; // no idea why Metabase wants cardId for this specific endpoint
+        
         HttpRequestMessage request1() =>
             new HttpRequestMessage(HttpMethod.Post, new Uri($"/api/dashboard/{dashboardId}/cards", UriKind.Relative))
             {
-                Content = ToJsonContent(content1).HttpContent
+                Content = ToJsonContent(jobj).HttpContent
             };
         var response = await sessionManager.Send(request1);
         try
