@@ -5,6 +5,10 @@ Tools for managing [Metabase](https://www.metabase.com/) .
 Used to export/import the current state of Metabase (questions/dashboards/collections) to/from a JSON file. 
 This file can then be stored on git for versioning.
 
+Currently this project supports Metabase v0.47
+[The Metabase API is not versioned and subject to changes with every version](https://www.metabase.com/docs/latest/api). 
+So don't expect this tool to work on other versions of Metabase.
+
 To use this [install Nix](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#the-determinate-nix-installer) and then run it with e.g. `nix run github:elevate/elevate.metabase.tools -- Command=Import ...`
 
 It's recommended that you pin a specific commit for reliability e.g. `nix run github:elevate/elevate.metabase.tools/09bc3ea332f82f8b5b32d730e4de262a0dd2c3fe -- Command=Import ...`
