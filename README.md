@@ -7,7 +7,7 @@ This file can then be stored on git for versioning.
 
 ## Supported Metabase versions
 
-This project supports Metabase v0.47 to v0.53.
+This project supports Metabase v0.47 to v0.54.
 
 [The Metabase API is not versioned and subject to changes with every version](https://www.metabase.com/docs/latest/api),
 so don't expect this tool to work on versions other than those listed above.
