@@ -96,7 +96,18 @@ public static class MetabaseApiImport
         var cards = await api.GetAllCards();
         foreach (var card in cards)
         {
-            await api.DeleteCard(card.Id);
+            // Deleting a card can take others with it: anything defined on top of a model
+            // goes when the model does. Metabase's own sample content is built that way, so
+            // the list fetched above can name cards that no longer exist by the time we get
+            // to them.
+            try
+            {
+                await api.DeleteCard(card.Id);
+            }
+            catch (MetabaseApiNotFoundException)
+            {
+                Console.WriteLine($"Card {card.Id} ('{card.Name}') was already deleted, skipping");
+            }
         }
     }
 
@@ -105,7 +116,14 @@ public static class MetabaseApiImport
         var dashboards = await api.GetAllDashboards();
         foreach (var dashboard in dashboards)
         {
-            await api.DeleteDashboard(dashboard.Id);
+            try
+            {
+                await api.DeleteDashboard(dashboard.Id);
+            }
+            catch (MetabaseApiNotFoundException)
+            {
+                Console.WriteLine($"Dashboard {dashboard.Id} ('{dashboard.Name}') was already deleted, skipping");
+            }
         }
     }
 

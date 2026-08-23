@@ -117,6 +117,33 @@ public static class Tests
         Assert.Equal(before.Collections.Length, after.Collections.Length);
     }
 
+    /// <summary>
+    /// Importing into an instance that still holds Metabase's own sample content has to work,
+    /// because from 0.50 onwards that is what every new instance looks like.
+    /// The sample content is built on a model, and deleting a model takes every question
+    /// defined on top of it, so the list of cards to delete goes stale halfway through.
+    /// </summary>
+    [Fact]
+    public static async Task ImportOverSampleContent()
+    {
+        await using var metabase = await BuildMetabaseContainer(archiveSampleContent: false);
+        var commonArgs = BuildMetabaseApiSettings(metabase);
+        var api = BuildApi(metabase);
+
+        await Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+            { "DatabaseMapping:1", "1"}
+        });
+
+        // the sample questions are gone and only the imported ones are left
+        var expected = ParseState(await File.ReadAllTextAsync(inputFilename));
+        var cards = await api.GetAllCards();
+        Assert.Equal(expected.Cards.Length, cards.Count);
+        await AssertAllQuestionsRun(api);
+    }
+
     [Fact]
     public static async Task ImportMergeExport()
     {
@@ -323,7 +350,7 @@ public static class Tests
         return r;
     }
 
-    static async Task<IContainer> BuildMetabaseContainer()
+    static async Task<IContainer> BuildMetabaseContainer(bool archiveSampleContent = true)
     {
         var postgres = new PostgreSqlBuilder()
             .WithImage("postgres:16")
@@ -361,7 +388,10 @@ public static class Tests
         cmd.Parameters.Add(new NpgsqlParameter { ParameterName = "user", Value = user });
 
         cmd.ExecuteNonQuery();
-        await ArchiveSampleContent(container);
+        if (archiveSampleContent)
+        {
+            await ArchiveSampleContent(container);
+        }
         return container;
     }
 

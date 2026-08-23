@@ -96,7 +96,10 @@ public class MetabaseSessionTokenManager
         {
             var requestContent = request.Content is null ? null : await request.Content.ReadAsStringAsync();
             var responseContent = await response.Content.ReadAsStringAsync();
-            throw new MetabaseApiException($"Error sending request to Metabase: {request.Method} {request.RequestUri}\nBody: {requestContent}\nStatus code: {response.StatusCode}\nResponse: {responseContent}");
+            var message = $"Error sending request to Metabase: {request.Method} {request.RequestUri}\nBody: {requestContent}\nStatus code: {response.StatusCode}\nResponse: {responseContent}";
+            throw response.StatusCode == HttpStatusCode.NotFound
+                ? new MetabaseApiNotFoundException(message)
+                : new MetabaseApiException(message);
         }
     }
 

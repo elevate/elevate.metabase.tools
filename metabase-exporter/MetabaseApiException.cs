@@ -12,3 +12,13 @@ public class MetabaseApiException: Exception
     {
     }
 }
+
+/// <summary>
+/// The requested entity does not exist in Metabase.
+/// </summary>
+public class MetabaseApiNotFoundException: MetabaseApiException
+{
+    public MetabaseApiNotFoundException(string message) : base(message)
+    {
+    }
+}
