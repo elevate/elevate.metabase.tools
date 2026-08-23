@@ -65,6 +65,7 @@ public class ResultMetadata
 /// <summary>
 /// Only supports type=native
 /// </summary>
+[JsonConverter(typeof(DatasetQueryConverter))]
 public class DatasetQuery
 {
     [JsonProperty("database")]
@@ -75,6 +76,73 @@ public class DatasetQuery
 
     [JsonProperty("native")]
     public NativeQuery Native { get; set; }
+}
+
+/// <summary>
+/// Reads both shapes Metabase has used for a dataset query.
+///
+/// Up to 0.56 the query hung off a "native" object:
+///     {"database":1,"type":"native","native":{"query":"select 1","template-tags":{}}}
+///
+/// 0.57 introduced a new query format, where it is one of a list of stages and the SQL is a
+/// bare string:
+///     {"lib/type":"mbql/query","database":1,
+///      "stages":[{"lib/type":"mbql.stage/native","native":"select 1","template-tags":{}}]}
+///
+/// 0.57 still accepts the old shape on write, so only reading is version-dependent: writing
+/// stays on the old shape, which keeps state files unchanged and importable by every
+/// supported version.
+/// </summary>
+public class DatasetQueryConverter : JsonConverter<DatasetQuery>
+{
+    /// <summary>
+    /// Writing goes through the normal contract for <see cref="DatasetQuery"/>.
+    /// </summary>
+    public override bool CanWrite => false;
+
+    public override void WriteJson(JsonWriter writer, DatasetQuery value, JsonSerializer serializer) =>
+        throw new NotSupportedException();
+
+    public override DatasetQuery ReadJson(JsonReader reader, Type objectType, DatasetQuery existingValue,
+        bool hasExistingValue, JsonSerializer serializer)
+    {
+        if (reader.TokenType == JsonToken.Null)
+        {
+            return null;
+        }
+
+        var jobj = JObject.Load(reader);
+        var query = new DatasetQuery();
+        if (jobj["database"] is { Type: not JTokenType.Null } database)
+        {
+            query.DatabaseId = new DatabaseId((int)database);
+        }
+
+        if (jobj["stages"] is not JArray stages)
+        {
+            // the shape used up to 0.56
+            query.Type = (string)jobj["type"];
+            query.Native = jobj["native"]?.ToObject<NativeQuery>(serializer);
+            return query;
+        }
+
+        // 0.57 and later. Only a single native stage maps onto what this tool supports;
+        // anything else is left with a null Native, which is how a question that cannot be
+        // exported is already reported everywhere else.
+        if (stages.Count == 1 && stages[0] is JObject stage
+            && (string)stage["lib/type"] == "mbql.stage/native")
+        {
+            query.Type = "native";
+            query.Native = new NativeQuery
+            {
+                Query = (string)stage["native"],
+                TemplateTags = stage["template-tags"]?.ToObject<IDictionary<string, TemplateTag>>(serializer)
+                               ?? new Dictionary<string, TemplateTag>(),
+            };
+        }
+
+        return query;
+    }
 }
 
 public class NativeQuery
