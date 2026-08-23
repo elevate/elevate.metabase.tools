@@ -54,7 +54,7 @@ public static class Program
     static async Task ImportMerge(this MetabaseApi api, Config.Import import)
     {
         var rawState = File.ReadAllText(import.InputFilename);
-        var state = JsonConvert.DeserializeObject<MetabaseState>(rawState);
+        var state = MetabaseJsonSerializer.Serializer.DeserializeObject<MetabaseState>(rawState);
         await api.ImportMerge(state, import.DatabaseMapping, import.IgnoredDatabases);
         Console.WriteLine($"Done importing from {import.InputFilename} into {import.MetabaseApiSettings.MetabaseApiUrl}");
     }

@@ -113,6 +113,17 @@ public static class MetabaseApiImport
         IReadOnlyList<Mapping<CardId>> cardMapping, IReadOnlyList<Mapping<Collection>> collectionMapping)
     {
         var mappedCards = MapDashboardCards(stateDashboard.Cards, cardMapping).ToImmutableList();
+        MapDashboardCollection(stateDashboard, collectionMapping);
+        Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
+        await api.CreateDashboard(stateDashboard);
+        await api.PutCardsToDashboard(stateDashboard.Id, mappedCards);
+    }
+
+    /// <summary>
+    /// Points the dashboard at the collection it maps to in the target Metabase instance.
+    /// </summary>
+    public static void MapDashboardCollection(Dashboard stateDashboard, IReadOnlyList<Mapping<Collection>> collectionMapping)
+    {
         if (stateDashboard.CollectionId.HasValue)
         {
             stateDashboard.CollectionId = collectionMapping
@@ -120,9 +131,6 @@ public static class MetabaseApiImport
                 .Select(x => x.Target.Id)
                 .First();
         }
-        Console.WriteLine($"Creating dashboard '{stateDashboard.Name}'");
-        await api.CreateDashboard(stateDashboard);
-        await api.PutCardsToDashboard(stateDashboard.Id, mappedCards);
     }
 
     public static IEnumerable<DashboardCard> MapDashboardCards(IEnumerable<DashboardCard> stateDashboardCards, IReadOnlyList<Mapping<CardId>> cardMapping)

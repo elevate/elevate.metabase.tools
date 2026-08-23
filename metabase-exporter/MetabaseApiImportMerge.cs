@@ -42,8 +42,9 @@ public static class MetabaseApiImportMerge
         Console.WriteLine("Upserting dashboards...");
         foreach (var dashboard in state.Dashboards)
         {
-            await api.UpsertDashboardByName(dashboard, existingDashboards);
             var mappedCards = MetabaseApiImport.MapDashboardCards(dashboard.Cards, cardMapping).ToImmutableList();
+            MetabaseApiImport.MapDashboardCollection(dashboard, collectionMapping);
+            await api.UpsertDashboardByName(dashboard, existingDashboards);
             await api.PutCardsToDashboard(dashboard.Id, mappedCards);
         }
         

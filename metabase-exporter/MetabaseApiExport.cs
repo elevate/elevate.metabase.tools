@@ -20,7 +20,7 @@ public static class MetabaseApiExport
     {
         var mappedCollections = await api.GetMappedCollections(excludePersonalCollections);
         var mappedCards = await api.GetMappedCards(mappedCollections.CollectionMapping);
-        var mappedDashboards = await api.GetMappedDashboards(mappedCards.CardMapping, mappedCollections.Collections);
+        var mappedDashboards = await api.GetMappedDashboards(mappedCards.CardMapping, mappedCollections.CollectionMapping);
 
         var state = new MetabaseState
         {
@@ -33,12 +33,12 @@ public static class MetabaseApiExport
     }
 
     static async Task<(IReadOnlyCollection<Dashboard> Dashboards, IReadOnlyDictionary<DashboardId, DashboardId> DashboardMapping)>
-        GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<CardId, CardId> cardMapping, IReadOnlyCollection<Collection> exportedCollections)
+        GetMappedDashboards(this MetabaseApi api, IReadOnlyDictionary<CardId, CardId> cardMapping, IReadOnlyDictionary<CollectionId, CollectionId> collectionMapping)
     {
         var dashboards = await api.GetAllDashboards();
         var nonArchivedDashboards = dashboards
             .Where(x => x.Archived == false)
-            .Where(dashboard => dashboard.CollectionId.HasValue == false || exportedCollections.Any(collection => collection.Id == dashboard.CollectionId))
+            .Where(dashboard => dashboard.CollectionId.HasValue == false || collectionMapping.ContainsKey(dashboard.CollectionId.Value))
             .OrderBy(x => x.Id)
             .ToArray();
         var dashboardMapping = Renumber(nonArchivedDashboards.Select(x => x.Id).ToImmutableList());
@@ -46,6 +46,10 @@ public static class MetabaseApiExport
         {
             var oldDashboardId = dashboard.Id;
             dashboard.Id = dashboardMapping.GetOrThrow(dashboard.Id, "Dashboard not found in mapping");
+            if (dashboard.CollectionId.HasValue)
+            {
+                dashboard.CollectionId = collectionMapping.GetOrThrow(dashboard.CollectionId.Value, $"Collection not found in collection mapping for dashboard {oldDashboardId}");
+            }
             var dashboardCardMapping = Renumber(dashboard.Cards.Select(x => x.Id).ToImmutableList());
             foreach (var card in dashboard.Cards.OrderBy(x => x.Id))
             {
@@ -62,8 +66,18 @@ public static class MetabaseApiExport
                 foreach (var seriesCard in card.Series)
                 {
                     seriesCard.Id = cardMapping.GetOrThrow(seriesCard.Id, $"Card not found in card mapping for series {seriesCard.Name}, dashboard {oldDashboardId}");
+                    if (seriesCard.CollectionId.HasValue)
+                    {
+                        seriesCard.CollectionId = collectionMapping.GetOrThrow(new CollectionId(seriesCard.CollectionId.Value), $"Collection not found in collection mapping for series {seriesCard.Name}, dashboard {oldDashboardId}").Value;
+                    }
                 }
+
+                // the API returns these in no particular order, so sort them to keep
+                // the exported state stable across exports
+                card.Series = card.Series.OrderBy(x => x.Id).ToArray();
             }
+
+            dashboard.Cards = dashboard.Cards.OrderBy(x => x.Id).ToArray();
         }
 
         return (nonArchivedDashboards, dashboardMapping);
