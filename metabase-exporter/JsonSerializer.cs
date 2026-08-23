@@ -24,6 +24,15 @@ public class AltNameContractResolver : DefaultContractResolver
     
     private readonly Dictionary<Type, Dictionary<string, JsonProperty>> _altNameMappings = 
         new Dictionary<Type, Dictionary<string, JsonProperty>>();
+
+    private JsonSerializer _tokenSerializer;
+
+    /// <summary>
+    /// Used to materialise alternately-named properties. Shares this resolver so that nested
+    /// objects honour their own <see cref="JsonPropertyAltAttribute"/>s.
+    /// </summary>
+    private JsonSerializer TokenSerializer =>
+        _tokenSerializer ??= JsonSerializer.Create(new JsonSerializerSettings { ContractResolver = this });
     
     // Override this to preserve property names
     protected override string ResolvePropertyName(string propertyName)
@@ -118,6 +127,19 @@ public class AltNameContractResolver : DefaultContractResolver
     /// </summary>
     private object ConvertValueToTargetType(object value, Type targetType)
     {
+        if (targetType.IsInstanceOfType(value))
+        {
+            return value;
+        }
+
+        // Unknown properties arrive here as JTokens, so anything that is not a plain scalar
+        // (e.g. the DashboardCard[] behind Metabase 0.48+ "dashcards") has to go through the
+        // serializer to be materialised into the target type.
+        if (value is JToken token)
+        {
+            return token.ToObject(targetType, TokenSerializer);
+        }
+
         // Handle numeric conversions
         if (IsNumericType(value.GetType()) && IsNumericType(targetType))
         {

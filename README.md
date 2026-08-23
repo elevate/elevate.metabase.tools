@@ -5,9 +5,27 @@ Tools for managing [Metabase](https://www.metabase.com/) .
 Used to export/import the current state of Metabase (questions/dashboards/collections) to/from a JSON file. 
 This file can then be stored on git for versioning.
 
-Currently this project supports Metabase v0.47
-[The Metabase API is not versioned and subject to changes with every version](https://www.metabase.com/docs/latest/api). 
-So don't expect this tool to work on other versions of Metabase.
+## Supported Metabase versions
+
+This project supports Metabase v0.47 and v0.48.
+
+[The Metabase API is not versioned and subject to changes with every version](https://www.metabase.com/docs/latest/api),
+so don't expect this tool to work on versions other than those listed above.
+Backward compatibility is a goal, though: every supported version is exercised
+in CI, and a state file exported from one supported version can be imported into
+any other.
+
+The test suite runs against one version at a time, selected by the
+`METABASE_VERSION` environment variable (a Metabase Docker image tag):
+
+```sh
+METABASE_VERSION=v0.47.13 dotnet test
+./run-tests.sh v0.47.13   # equivalent, via the Nix wrapper
+```
+
+It defaults to the newest supported version. The [CI
+workflow](.github/workflows/elevate.metabase.tools.yml) runs a matrix job per
+supported version; add a version there when adding support for a new one.
 
 To use this [install Nix](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#the-determinate-nix-installer) and then run it with e.g. `nix run github:elevate/elevate.metabase.tools -- Command=Import ...`
 

@@ -127,9 +127,6 @@ public class Collection
     [JsonProperty("description")]
     public string Description { get; set; }
 
-    [JsonProperty("color")]
-    public string Color { get; set; }
-
     [JsonProperty("archived")]
     public bool Archived { get; set; }
 }
@@ -160,7 +157,12 @@ public class Dashboard
     [JsonProperty("parameters")]
     public DashboardParameter[] Parameters { get; set; }
 
-    [JsonProperty("ordered_cards")]
+    /// <summary>
+    /// Metabase renamed this from "ordered_cards" to "dashcards" in 0.48.
+    /// "ordered_cards" stays the written name so that state files are unchanged
+    /// and remain readable by older versions of this tool.
+    /// </summary>
+    [JsonPropertyAlt("ordered_cards", "dashcards")]
     public DashboardCard[] Cards { get; set; }
 }
 

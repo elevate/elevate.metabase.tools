@@ -5,10 +5,19 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
+      matrix:
+        # Every Metabase version this tool supports. The tool aims to stay
+        # backward compatible, so all of these must keep passing.
+        metabase-version:
+          - v0.47.13
+          - v0.48.13
+    name: test (Metabase ${{ matrix.metabase-version }})
     steps:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v26
         with:
           install_url: https://releases.nixos.org/nix/nix-2.20.5/install
       - name: Build and test
+        env:
+          METABASE_VERSION: ${{ matrix.metabase-version }}
         run: ./run-tests.sh

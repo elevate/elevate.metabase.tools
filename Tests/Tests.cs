@@ -332,7 +332,7 @@ public static class Tests
         var privateIP = docker.Networks.InspectNetworkAsync("bridge").GetAwaiter().GetResult().IPAM.Config[0].Gateway;
         var connString = new NpgsqlConnectionStringBuilder(postgres.GetConnectionString());
         var container = new ContainerBuilder()
-            .WithImage("metabase/metabase:v0.47.13")
+            .WithImage($"metabase/metabase:{MetabaseVersion}")
             .WithPortBinding(metabasePort, assignRandomHostPort: true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Metabase Initialization COMPLETE"))
             .WithEnvironment(new Dictionary<string, string>
@@ -363,6 +363,18 @@ public static class Tests
         return container;
     }
 
+    /// <summary>
+    /// The Metabase version to test against, as a Docker image tag.
+    /// Override with the METABASE_VERSION environment variable to test another
+    /// supported version, e.g. METABASE_VERSION=v0.47.13 dotnet test.
+    /// CI runs this over every version listed in the workflow matrix.
+    /// </summary>
+    static string MetabaseVersion =>
+        Environment.GetEnvironmentVariable("METABASE_VERSION") is { Length: > 0 } v
+            ? v
+            : defaultMetabaseVersion;
+
+    const string defaultMetabaseVersion = "v0.48.13";
     const string inputFilename = "metabase-state.json";
     const string password = "123456";
     const string user = "mauricioscheffer@gmail.com";

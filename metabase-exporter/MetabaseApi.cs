@@ -148,12 +148,24 @@ public record MetabaseApi(
         }
     }
     
+    /// <summary>
+    /// Metabase's own default collection colour.
+    /// </summary>
+    const string DefaultCollectionColor = "#509EE3";
+
     public async Task<Collection> CreateCollection(Collection collection)
     {
+        // Metabase dropped collection colours in 0.48: it no longer returns one and ignores
+        // whatever it is sent. 0.47 and earlier still validate it on creation and reject the
+        // request without one, so send the default rather than modelling a field that only
+        // some versions have. Colours are cosmetic, so nothing of substance is lost.
+        var jobj = JObject.Parse(MetabaseJsonSerializer.Serializer.SerializeObject(collection));
+        jobj["color"] = DefaultCollectionColor;
+
         HttpRequestMessage request() => 
             new HttpRequestMessage(HttpMethod.Post, new Uri("/api/collection", UriKind.Relative))
             {
-                Content = ToJsonContent(collection).HttpContent
+                Content = ToJsonContent(jobj).HttpContent
             };
         var response = await sessionManager.Send(request);
         try
