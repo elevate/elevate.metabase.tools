@@ -82,8 +82,14 @@ public class NativeQuery
     [JsonProperty("query")]
     public string Query { get; set; }
 
-    [JsonProperty("collection")]
-    public string Collection { get; set; } // no idea what this is for. it's not a reference to the containing collection
+    /// <summary>
+    /// The collection to query, for databases that have them (e.g. MongoDB). Not a reference
+    /// to the containing <see cref="metabase_exporter.Collection"/>, and irrelevant to SQL.
+    /// Omitted when absent because Metabase 0.50 onwards rejects a null with
+    /// "should be a string" / "non-blank string".
+    /// </summary>
+    [JsonProperty("collection", NullValueHandling = NullValueHandling.Ignore)]
+    public string Collection { get; set; }
 
     [JsonProperty("template-tags")]
     public IDictionary<string, TemplateTag> TemplateTags { get; set; }

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using Docker.DotNet;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -360,8 +361,43 @@ public static class Tests
         cmd.Parameters.Add(new NpgsqlParameter { ParameterName = "user", Value = user });
 
         cmd.ExecuteNonQuery();
+        await ArchiveSampleContent(container);
         return container;
     }
+
+    /// <summary>
+    /// Metabase 0.50 and later seed new instances with an "Examples" collection full of
+    /// questions, which would otherwise turn up in every export and make the expected state
+    /// depend on the Metabase version under test.
+    /// MB_LOAD_SAMPLE_CONTENT=false is not usable for this: it also drops the Sample Database
+    /// that the test questions query. So archive the collection instead. Archiving takes its
+    /// questions with it, and the exporter ignores archived entities.
+    /// </summary>
+    static async Task ArchiveSampleContent(IContainer metabase)
+    {
+        using var http = new HttpClient { BaseAddress = new Uri(MetabaseUrl(metabase)) };
+        var login = await http.PostAsync("/api/session", JsonContent(
+            new JObject { ["username"] = user, ["password"] = password }));
+        login.EnsureSuccessStatusCode();
+        var token = (string?)JObject.Parse(await login.Content.ReadAsStringAsync())["id"];
+        http.DefaultRequestHeaders.Add("X-Metabase-Session", token);
+
+        var collections = JArray.Parse(await http.GetStringAsync("/api/collection"));
+        // `is_sample` only exists on the versions that have sample content in the first place,
+        // so fall back to the name for the rest.
+        var sampleCollections = collections
+            .Where(c => (bool?)c["is_sample"] == true || (string?)c["name"] == "Examples")
+            .ToImmutableList();
+        foreach (var collection in sampleCollections)
+        {
+            var response = await http.PutAsync($"/api/collection/{collection["id"]}",
+                JsonContent(new JObject { ["archived"] = true }));
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+    static StringContent JsonContent(JObject body) =>
+        new StringContent(body.ToString(), Encoding.UTF8, "application/json");
 
     /// <summary>
     /// The Metabase version to test against, as a Docker image tag.
