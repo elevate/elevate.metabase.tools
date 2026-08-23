@@ -15,6 +15,14 @@
       "description": null,
       "color": "#31698A",
       "archived": false
+    },
+    {
+      "id": 3,
+      "name": "Reports",
+      "slug": "reports",
+      "description": "a nested-ish collection",
+      "color": "#509EE3",
+      "archived": false
     }
   ],
   "dashboards": [
@@ -32,11 +40,103 @@
           "id": 1,
           "col": 0,
           "row": 0,
-          "sizeX": 4,
-          "sizeY": 4,
+          "size_x": 4,
+          "size_y": 4,
           "card_id": 1,
           "parameter_mappings": [],
           "visualization_settings": {},
+          "series": []
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rich dashboard",
+      "archived": false,
+      "collection_id": 3,
+      "description": "exercises parameters, series and virtual cards",
+      "enable_embedding": false,
+      "embedding_params": null,
+      "parameters": [
+        {
+          "id": "abc12345",
+          "name": "State",
+          "slug": "state",
+          "type": "category",
+          "default": null
+        }
+      ],
+      "ordered_cards": [
+        {
+          "id": 1,
+          "col": 0,
+          "row": 0,
+          "size_x": 6,
+          "size_y": 4,
+          "card_id": 2,
+          "parameter_mappings": [
+            {
+              "parameter_id": "abc12345",
+              "card_id": 2,
+              "target": [
+                "variable",
+                [
+                  "template-tag",
+                  "state"
+                ]
+              ]
+            }
+          ],
+          "visualization_settings": {},
+          "series": []
+        },
+        {
+          "id": 2,
+          "col": 6,
+          "row": 0,
+          "size_x": 6,
+          "size_y": 4,
+          "card_id": 3,
+          "parameter_mappings": [],
+          "visualization_settings": {},
+          "series": [
+            {
+              "id": 4,
+              "description": null,
+              "collection_id": 3,
+              "name": "orders by month",
+              "display": "line",
+              "dataset_query": {
+                "database": 1,
+                "type": "native",
+                "native": {
+                  "query": "select CREATED_AT, count(*) from ORDERS group by CREATED_AT",
+                  "collection": null,
+                  "template-tags": {}
+                }
+              },
+              "visualization_settings": {}
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "col": 0,
+          "row": 4,
+          "size_x": 12,
+          "size_y": 2,
+          "card_id": null,
+          "parameter_mappings": [],
+          "visualization_settings": {
+            "virtual_card": {
+              "name": null,
+              "display": "text",
+              "visualization_settings": {},
+              "dataset_query": {},
+              "archived": false
+            },
+            "text": "some static text"
+          },
           "series": []
         }
       ]
@@ -134,6 +234,167 @@
         "table.pivot_column": "SOURCE",
         "table.cell_column": "ID"
       }
+    },
+    {
+      "id": 2,
+      "description": "a question with a SQL parameter",
+      "archived": false,
+      "result_metadata": [
+        {
+          "name": "ID",
+          "base_type": "type/BigInteger",
+          "display_name": "ID"
+        },
+        {
+          "name": "ADDRESS",
+          "base_type": "type/Text",
+          "display_name": "ADDRESS"
+        },
+        {
+          "name": "EMAIL",
+          "base_type": "type/Text",
+          "display_name": "EMAIL"
+        },
+        {
+          "name": "PASSWORD",
+          "base_type": "type/Text",
+          "display_name": "PASSWORD"
+        },
+        {
+          "name": "NAME",
+          "base_type": "type/Text",
+          "display_name": "NAME"
+        },
+        {
+          "name": "CITY",
+          "base_type": "type/Text",
+          "display_name": "CITY"
+        },
+        {
+          "name": "LONGITUDE",
+          "base_type": "type/Float",
+          "display_name": "LONGITUDE"
+        },
+        {
+          "name": "STATE",
+          "base_type": "type/Text",
+          "display_name": "STATE"
+        },
+        {
+          "name": "SOURCE",
+          "base_type": "type/Text",
+          "display_name": "SOURCE"
+        },
+        {
+          "name": "BIRTH_DATE",
+          "base_type": "type/Date",
+          "display_name": "BIRTH_DATE"
+        },
+        {
+          "name": "ZIP",
+          "base_type": "type/Text",
+          "display_name": "ZIP"
+        },
+        {
+          "name": "LATITUDE",
+          "base_type": "type/Float",
+          "display_name": "LATITUDE"
+        },
+        {
+          "name": "CREATED_AT",
+          "base_type": "type/DateTime",
+          "display_name": "CREATED_AT"
+        }
+      ],
+      "metadata_checksum": "ODRE+hxxuG1g8OF9Oc7ogQ==",
+      "database_id": 1,
+      "enable_embedding": false,
+      "embedding_params": null,
+      "collection_id": 3,
+      "name": "people by state",
+      "display": "table",
+      "dataset_query": {
+        "database": 1,
+        "type": "native",
+        "native": {
+          "query": "select * from PEOPLE where STATE = {{state}}",
+          "collection": null,
+          "template-tags": {
+            "state": {
+              "id": "0d1d1d1d-1111-2222-3333-444444444444",
+              "name": "state",
+              "display-name": "State",
+              "type": "text",
+              "required": false,
+              "default": "CA"
+            }
+          }
+        }
+      },
+      "visualization_settings": {}
+    },
+    {
+      "id": 3,
+      "description": null,
+      "archived": false,
+      "result_metadata": [
+        {
+          "name": "COUNT(*)",
+          "base_type": "type/BigInteger",
+          "display_name": "COUNT(*)"
+        }
+      ],
+      "metadata_checksum": "rnpjulvALstcnfI8+SvXFQ==",
+      "database_id": 1,
+      "enable_embedding": false,
+      "embedding_params": null,
+      "collection_id": 3,
+      "name": "orders count",
+      "display": "line",
+      "dataset_query": {
+        "database": 1,
+        "type": "native",
+        "native": {
+          "query": "select count(*) from ORDERS",
+          "collection": null,
+          "template-tags": {}
+        }
+      },
+      "visualization_settings": {}
+    },
+    {
+      "id": 4,
+      "description": null,
+      "archived": false,
+      "result_metadata": [
+        {
+          "name": "CREATED_AT",
+          "base_type": "type/DateTime",
+          "display_name": "CREATED_AT"
+        },
+        {
+          "name": "COUNT(*)",
+          "base_type": "type/BigInteger",
+          "display_name": "COUNT(*)"
+        }
+      ],
+      "metadata_checksum": "rdyOxmxfOX8xRcBHQnyipQ==",
+      "database_id": 1,
+      "enable_embedding": false,
+      "embedding_params": null,
+      "collection_id": 3,
+      "name": "orders by month",
+      "display": "line",
+      "dataset_query": {
+        "database": 1,
+        "type": "native",
+        "native": {
+          "query": "select CREATED_AT, count(*) from ORDERS group by CREATED_AT",
+          "collection": null,
+          "template-tags": {}
+        }
+      },
+      "visualization_settings": {}
     }
   ]
 }
