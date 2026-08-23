@@ -15,6 +15,7 @@ jobs:
           - v0.50.36
           - v0.51.14
           - v0.52.17
+          - v0.53.18
     name: test (Metabase ${{ matrix.metabase-version }})
     steps:
       - uses: actions/checkout@v2
