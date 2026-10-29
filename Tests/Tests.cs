@@ -430,7 +430,7 @@ public static class Tests
     /// <summary>
     /// The Metabase version to test against, as a Docker image tag.
     /// Override with the METABASE_VERSION environment variable to test another
-    /// supported version, e.g. METABASE_VERSION=v0.47.13 dotnet test.
+    /// supported version, e.g. METABASE_VERSION=v0.48.13 dotnet test.
     /// CI runs this over every version listed in the workflow matrix.
     /// </summary>
     static string MetabaseVersion =>
