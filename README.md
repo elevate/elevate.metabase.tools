@@ -76,6 +76,8 @@ In the example above, it maps:
 * the database ID 1 in the file to the database ID 2 in the target Metabase instance
 * the database ID 2 in the file to the database ID 3 in the target Metabase instance
 
+Boolean settings such as `Merge` and `ExcludePersonalCollections` accept `true`, `false`, `1`, or `0`. Any other value is an error.
+
 ### Test questions
 
 This runs the queries in all Metabase Questions/Cards. Use it to test that the queries (i.e. SQL) are valid.

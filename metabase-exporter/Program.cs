@@ -116,7 +116,7 @@ public static class Program
                 throw new Exception("Missing InputFilename config");
             }
 
-            bool.TryParse(rawConfig["Merge"], out var merge);
+            var merge = ParseBool(rawConfig, "Merge");
             var ignoreDatabases = ParseIdList<DatabaseId>(rawConfig, "IgnoreDatabases");
             var databaseMapping = ParseDatabaseMapping(rawConfig);
             return new Config.Import(apiSettings, inputFilename, merge, databaseMapping, ignoreDatabases);
@@ -130,7 +130,7 @@ public static class Program
                 throw new Exception("Missing OutputFilename config");
             }
 
-            var excludePersonalCollections = string.IsNullOrEmpty(rawConfig["ExcludePersonalCollections"]) == false;
+            var excludePersonalCollections = ParseBool(rawConfig, "ExcludePersonalCollections");
 
             return new Config.Export(apiSettings, outputFilename, excludePersonalCollections);
         }
@@ -148,6 +148,14 @@ public static class Program
         }
         throw new Exception($"Invalid command '{command}', must be either 'import' or 'export' or 'test-questions' or 'delete'");
     }
+
+    static bool ParseBool(IConfiguration rawConfig, string configKey) =>
+        rawConfig[configKey]?.Trim().ToLowerInvariant() switch
+        {
+            null or "" or "false" or "0" => false,
+            "true" or "1" => true,
+            var rawValue => throw new Exception($"Invalid {configKey} value: '{rawValue}', must be true, false, 1 or 0"),
+        };
 
     static IReadOnlyList<TId> ParseIdList<TId>(IConfiguration rawConfig, string configKey)
         where TId: INewTypeEq<TId, int>, new()
@@ -239,7 +247,7 @@ public static class Program
             throw new Exception("Missing MetabaseApi:Password config");
         }
 
-        bool.TryParse(metabaseApiSection["IgnoreSSLErrors"], out var ignoreSSLErrors);
+        var ignoreSSLErrors = ParseBool(metabaseApiSection, "IgnoreSSLErrors");
 
         var timeout = TryParseTimeout(metabaseApiSection["Timeout"]);
 
