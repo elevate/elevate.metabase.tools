@@ -12,7 +12,6 @@ jobs:
         # Every Metabase version this tool supports. The tool aims to stay
         # backward compatible, so all of these must keep passing.
         metabase-version:
-          - v0.48.13
           - v0.49.25
           - v0.50.36
           - v0.51.14

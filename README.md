@@ -7,7 +7,7 @@ This file can then be stored on git for versioning.
 
 ## Supported Metabase versions
 
-This project supports Metabase v0.48 to v0.57.
+This project supports Metabase v0.49 to v0.57.
 
 [The Metabase API is not versioned and subject to changes with every version](https://www.metabase.com/docs/latest/api),
 so don't expect this tool to work on versions other than those listed above.
@@ -19,8 +19,8 @@ The test suite runs against one version at a time, selected by the
 `METABASE_VERSION` environment variable (a Metabase Docker image tag):
 
 ```sh
-METABASE_VERSION=v0.48.13 dotnet test
-./run-tests.sh v0.48.13   # equivalent, via the Nix wrapper
+METABASE_VERSION=v0.49.25 dotnet test
+./run-tests.sh v0.49.25   # equivalent, via the Nix wrapper
 ```
 
 It defaults to the newest supported version. The [CI
