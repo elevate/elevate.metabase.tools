@@ -430,7 +430,7 @@ public static class Tests
     /// <summary>
     /// The Metabase version to test against, as a Docker image tag.
     /// Override with the METABASE_VERSION environment variable to test another
-    /// supported version, e.g. METABASE_VERSION=v0.47.13 dotnet test.
+    /// supported version, e.g. METABASE_VERSION=v0.50.36 dotnet test.
     /// CI runs this over every version listed in the workflow matrix.
     /// </summary>
     static string MetabaseVersion =>
@@ -438,7 +438,7 @@ public static class Tests
             ? v
             : defaultMetabaseVersion;
 
-    const string defaultMetabaseVersion = "v0.48.13";
+    const string defaultMetabaseVersion = "v0.57.20";
     const string inputFilename = "metabase-state.json";
     const string password = "123456";
     const string user = "mauricioscheffer@gmail.com";
