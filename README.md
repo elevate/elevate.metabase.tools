@@ -31,7 +31,7 @@ To use this [install Nix](https://github.com/DeterminateSystems/nix-installer?ta
 
 It's recommended that you pin a specific commit for reliability e.g. `nix run github:elevate/elevate.metabase.tools/09bc3ea332f82f8b5b32d730e4de262a0dd2c3fe -- Command=Import ...`
 
-If you're on Windows or want to develop, install the .NET 8 SDK and run it from the `metabase-exporter` with e.g. `dotnet run -- Command=Import ...`
+If you're on Windows or want to develop, install the .NET 10 SDK and run it from the `metabase-exporter` with e.g. `dotnet run -- Command=Import ...`
 
 See usage flags below.
 

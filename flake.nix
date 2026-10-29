@@ -30,8 +30,8 @@
             pname = "metabase-exporter";
             version = "0.0.1";
             src = ./.;
-            dotnet-sdk = pkgs.dotnet-sdk_8;
-            dotnet-runtime = pkgs.dotnet-runtime_8;
+            dotnet-sdk = pkgs.dotnet-sdk_10;
+            dotnet-runtime = pkgs.dotnet-runtime_10;
             # testProjectFile = ./Tests/Tests.csproj;
             nugetDeps = inputs.nuget2nix.lib {
               inherit system;
@@ -44,7 +44,7 @@
 
         devShells.default = pkgs.mkShell {
           buildInputs = [ 
-            pkgs.dotnet-sdk_8
+            pkgs.dotnet-sdk_10
           ];
         };
       };
