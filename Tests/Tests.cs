@@ -189,6 +189,7 @@ public static class Tests
         CompareStates(expected: input, actual: exported);
 
         await AssertMergeAppliesChanges(commonArgs, input);
+        await AssertMergeDeletesNothing(commonArgs);
     }
 
     /// <summary>
@@ -275,6 +276,21 @@ public static class Tests
         var exportedState = ParseState(exported);
         Assert.Equal(exportedState.Cards.Length, exportedState.Cards.Select(c => c.Name).Distinct().Count());
         Assert.Equal(exportedState.Dashboards.Length, exportedState.Dashboards.Select(d => d.Name).Distinct().Count());
+    }
+
+    /// <summary>
+    /// Merging leaves alone whatever the state file doesn't mention.
+    /// </summary>
+    static async Task AssertMergeDeletesNothing(IReadOnlyDictionary<string, string> commonArgs)
+    {
+        var before = await Export(commonArgs, "merge-before-empty.json");
+
+        const string emptyFilename = "merge-empty-input.json";
+        var empty = new MetabaseState { Collections = [], Cards = [], Dashboards = [] };
+        await File.WriteAllTextAsync(emptyFilename, MetabaseJsonSerializer.IndentedSerializer.SerializeObject(empty));
+        await Run(commonArgs, MergeImport(emptyFilename));
+
+        CompareStates(expected: before, actual: await Export(commonArgs, "merge-after-empty.json"));
     }
 
     static async Task AssertAllQuestionsRun(MetabaseApi api)
