@@ -42,6 +42,7 @@ public static class Tests
         CompareStates(expected: input, actual: exported);
 
         await AssertInvalidDatabaseMappingDeletesNothing(commonArgs, input);
+        await AssertIgnoreDatabases(commonArgs);
 
         // importing again exercises the delete-everything-first path, which a fresh
         // instance never does
@@ -81,6 +82,35 @@ public static class Tests
         Assert.StartsWith("Missing databases in mapping", missingSource.Message);
 
         CompareStates(expected: input, actual: await Export(commonArgs, "test-after-invalid-mapping.json"));
+    }
+
+    /// <summary>
+    /// Import skips the questions in an ignored database, including where another question
+    /// uses one as a series on a dashboard.
+    /// </summary>
+    static async Task AssertIgnoreDatabases(IReadOnlyDictionary<string, string> commonArgs)
+    {
+        var state = ParseState(await File.ReadAllTextAsync(inputFilename));
+        var ignoredCard = Assert.Single(state.Cards, c => c.Name == "orders by month");
+        ignoredCard.DatabaseId = new DatabaseId(2);
+        ignoredCard.DatasetQuery.DatabaseId = new DatabaseId(2);
+        const string ignoringFilename = "test-ignoring-input.json";
+        await File.WriteAllTextAsync(ignoringFilename, MetabaseJsonSerializer.IndentedSerializer.SerializeObject(state));
+
+        await Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", ignoringFilename},
+            { "DatabaseMapping:1", "1"},
+            { "IgnoreDatabases", "2"},
+        });
+
+        var exported = ParseState(await Export(commonArgs, "test-ignoring.json"));
+        Assert.Equal(state.Cards.Length - 1, exported.Cards.Length);
+        Assert.DoesNotContain(exported.Cards, c => c.Name == ignoredCard.Name);
+        var dashboard = Assert.Single(exported.Dashboards, d => d.Name == "rich dashboard");
+        Assert.Equal(3, dashboard.Cards.Length);
+        Assert.All(dashboard.Cards, c => Assert.Empty(c.Series));
     }
 
     /// <summary>
