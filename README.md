@@ -76,6 +76,11 @@ In the example above, it maps:
 * the database ID 1 in the file to the database ID 2 in the target Metabase instance
 * the database ID 2 in the file to the database ID 3 in the target Metabase instance
 
+By default, import deletes every dashboard and question in the target Metabase instance before it creates the ones in the file.
+To keep them instead, set `Merge=true`. A merge updates the dashboards and questions whose names match one in the file, creates the rest, and leaves everything else in the target instance alone.
+
+To skip the questions that use a database, list its ID in the file under `IgnoreDatabases`, for example `IgnoreDatabases=3,4`. An ignored database needs no `DatabaseMapping`.
+
 Boolean settings such as `Merge` and `ExcludePersonalCollections` accept `true`, `false`, `1`, or `0`. Any other value is an error.
 
 ### Test questions
