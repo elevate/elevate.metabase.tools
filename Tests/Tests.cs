@@ -41,6 +41,8 @@ public static class Tests
         var input = await File.ReadAllTextAsync(inputFilename);
         CompareStates(expected: input, actual: exported);
 
+        await AssertInvalidDatabaseMappingDeletesNothing(commonArgs, input);
+
         // importing again exercises the delete-everything-first path, which a fresh
         // instance never does
         await Run(commonArgs, new Dictionary<string, string>
@@ -55,6 +57,30 @@ public static class Tests
 
         await AssertExcludePersonalCollections(commonArgs);
         await AssertDelete(commonArgs, api);
+    }
+
+    /// <summary>
+    /// Import deletes everything before it creates anything, so it must reject a bad database
+    /// mapping while the instance is still intact.
+    /// </summary>
+    static async Task AssertInvalidDatabaseMappingDeletesNothing(IReadOnlyDictionary<string, string> commonArgs, string input)
+    {
+        var unknownTarget = await Assert.ThrowsAsync<Exception>(() => Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+            { "DatabaseMapping:1", "999"}
+        }));
+        Assert.StartsWith("Mappings referencing invalid databases", unknownTarget.Message);
+
+        var missingSource = await Assert.ThrowsAsync<Exception>(() => Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+        }));
+        Assert.StartsWith("Missing databases in mapping", missingSource.Message);
+
+        CompareStates(expected: input, actual: await Export(commonArgs, "test-after-invalid-mapping.json"));
     }
 
     /// <summary>
