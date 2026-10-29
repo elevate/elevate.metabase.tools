@@ -41,6 +41,9 @@ public static class Tests
         var input = await File.ReadAllTextAsync(inputFilename);
         CompareStates(expected: input, actual: exported);
 
+        await AssertInvalidDatabaseMappingDeletesNothing(commonArgs, input);
+        await AssertIgnoreDatabases(commonArgs);
+
         // importing again exercises the delete-everything-first path, which a fresh
         // instance never does
         await Run(commonArgs, new Dictionary<string, string>
@@ -55,6 +58,59 @@ public static class Tests
 
         await AssertExcludePersonalCollections(commonArgs);
         await AssertDelete(commonArgs, api);
+    }
+
+    /// <summary>
+    /// Import deletes everything before it creates anything, so it must reject a bad database
+    /// mapping while the instance is still intact.
+    /// </summary>
+    static async Task AssertInvalidDatabaseMappingDeletesNothing(IReadOnlyDictionary<string, string> commonArgs, string input)
+    {
+        var unknownTarget = await Assert.ThrowsAsync<Exception>(() => Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+            { "DatabaseMapping:1", "999"}
+        }));
+        Assert.StartsWith("Mappings referencing invalid databases", unknownTarget.Message);
+
+        var missingSource = await Assert.ThrowsAsync<Exception>(() => Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", inputFilename},
+        }));
+        Assert.StartsWith("Missing databases in mapping", missingSource.Message);
+
+        CompareStates(expected: input, actual: await Export(commonArgs, "test-after-invalid-mapping.json"));
+    }
+
+    /// <summary>
+    /// Import skips the questions in an ignored database, including where another question
+    /// uses one as a series on a dashboard.
+    /// </summary>
+    static async Task AssertIgnoreDatabases(IReadOnlyDictionary<string, string> commonArgs)
+    {
+        var state = ParseState(await File.ReadAllTextAsync(inputFilename));
+        var ignoredCard = Assert.Single(state.Cards, c => c.Name == "orders by month");
+        ignoredCard.DatabaseId = new DatabaseId(2);
+        ignoredCard.DatasetQuery.DatabaseId = new DatabaseId(2);
+        const string ignoringFilename = "test-ignoring-input.json";
+        await File.WriteAllTextAsync(ignoringFilename, MetabaseJsonSerializer.IndentedSerializer.SerializeObject(state));
+
+        await Run(commonArgs, new Dictionary<string, string>
+        {
+            { "Command", "import"},
+            { "InputFilename", ignoringFilename},
+            { "DatabaseMapping:1", "1"},
+            { "IgnoreDatabases", "2"},
+        });
+
+        var exported = ParseState(await Export(commonArgs, "test-ignoring.json"));
+        Assert.Equal(state.Cards.Length - 1, exported.Cards.Length);
+        Assert.DoesNotContain(exported.Cards, c => c.Name == ignoredCard.Name);
+        var dashboard = Assert.Single(exported.Dashboards, d => d.Name == "rich dashboard");
+        Assert.Equal(3, dashboard.Cards.Length);
+        Assert.All(dashboard.Cards, c => Assert.Empty(c.Series));
     }
 
     /// <summary>
@@ -163,6 +219,7 @@ public static class Tests
         CompareStates(expected: input, actual: exported);
 
         await AssertMergeAppliesChanges(commonArgs, input);
+        await AssertMergeDeletesNothing(commonArgs);
     }
 
     /// <summary>
@@ -249,6 +306,21 @@ public static class Tests
         var exportedState = ParseState(exported);
         Assert.Equal(exportedState.Cards.Length, exportedState.Cards.Select(c => c.Name).Distinct().Count());
         Assert.Equal(exportedState.Dashboards.Length, exportedState.Dashboards.Select(d => d.Name).Distinct().Count());
+    }
+
+    /// <summary>
+    /// Merging leaves alone whatever the state file doesn't mention.
+    /// </summary>
+    static async Task AssertMergeDeletesNothing(IReadOnlyDictionary<string, string> commonArgs)
+    {
+        var before = await Export(commonArgs, "merge-before-empty.json");
+
+        const string emptyFilename = "merge-empty-input.json";
+        var empty = new MetabaseState { Collections = [], Cards = [], Dashboards = [] };
+        await File.WriteAllTextAsync(emptyFilename, MetabaseJsonSerializer.IndentedSerializer.SerializeObject(empty));
+        await Run(commonArgs, MergeImport(emptyFilename));
+
+        CompareStates(expected: before, actual: await Export(commonArgs, "merge-after-empty.json"));
     }
 
     static async Task AssertAllQuestionsRun(MetabaseApi api)

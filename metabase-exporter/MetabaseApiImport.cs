@@ -178,13 +178,24 @@ public static class MetabaseApiImport
                     .First();
             }
 
+            var mappedSeries = new List<DashboardSeriesCard>();
             foreach (var s in card.Series)
             {
-                s.Id = cardMapping
+                var mappedSeriesId = cardMapping
                     .Where(x => x.Source == s.Id)
-                    .Select(x => x.Target)
-                    .First();
+                    .Select(x => (CardId?)x.Target)
+                    .FirstOrDefault();
+
+                if (mappedSeriesId.HasValue == false)
+                {
+                    Console.WriteLine($"WARNING: skipping series {s.Id} on card {card.Id} because it could not be found in the mappings");
+                    continue;
+                }
+
+                s.Id = mappedSeriesId.Value;
+                mappedSeries.Add(s);
             }
+            card.Series = mappedSeries.ToArray();
             yield return card;
         }
     }
