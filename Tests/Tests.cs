@@ -352,15 +352,13 @@ public static class Tests
 
     static async Task<IContainer> BuildMetabaseContainer(bool archiveSampleContent = true)
     {
-        var postgres = new PostgreSqlBuilder()
-            .WithImage("postgres:16")
+        var postgres = new PostgreSqlBuilder("postgres:16")
             .Build();
         await postgres.StartAsync();
-        using var docker = new DockerClientConfiguration().CreateClient();
+        using var docker = new DockerClientBuilder().Build();
         var privateIP = docker.Networks.InspectNetworkAsync("bridge").GetAwaiter().GetResult().IPAM.Config[0].Gateway;
         var connString = new NpgsqlConnectionStringBuilder(postgres.GetConnectionString());
-        var container = new ContainerBuilder()
-            .WithImage($"metabase/metabase:{MetabaseVersion}")
+        var container = new ContainerBuilder($"metabase/metabase:{MetabaseVersion}")
             .WithPortBinding(metabasePort, assignRandomHostPort: true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Metabase Initialization COMPLETE"))
             .WithEnvironment(new Dictionary<string, string>
